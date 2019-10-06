@@ -6,13 +6,35 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Waiter",
+            "request": "launch",
+            "mainClass": "agents.Waiter",
+            "projectName": "Restaurant-MAS"
+        },
+        {
+            "type": "java",
+            "name": "Agent",
+            "request": "launch",
+            "mainClass": "jade.Boot",
+            "args": [
+                "-agents",
+                "waiter:agents.Waiter"
+            ],
+            "classPaths": [
+                "lib/jade.jar",
+                "src"
+            ]
+        },
+        {
+            "type": "java",
             "name": "Jade",
             "request": "launch",
             "mainClass": "jade.Boot",
             "args": "-gui",
-            "classPaths": ["lib/jade.jar"]
-        }
-        ,
+            "classPaths": [
+                "lib/jade.jar"
+            ]
+        },
         {
             "type": "java",
             "name": "Debug (Launch) - Current File",
