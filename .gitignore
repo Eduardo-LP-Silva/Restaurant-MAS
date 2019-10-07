@@ -30,6 +30,10 @@ hs_err_pid*
 .vscode/
 .settings/
 .classpath
+.idea/
+.project
+bin/
+Restaurant-MAS.iml
 
 
 
