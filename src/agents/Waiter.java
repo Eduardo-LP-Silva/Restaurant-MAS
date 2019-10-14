@@ -10,6 +10,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 
 public class Waiter extends Agent 
 {
@@ -37,13 +38,21 @@ public class Waiter extends Agent
 
         System.out.println("Waiter " + this.getAID().getLocalName() + " at your service.");
 
-        if(!searchKitchen())
+        if(!searchForKitchen())
             this.doDelete();
         
         this.addBehaviour(new TakeOrder());
     }
 
-    private boolean searchKitchen() {
+    private Integer searchKitchen(String dish, String property) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+        
+        request.setContent("");
+
+        return 0;
+    }
+
+    private boolean searchForKitchen() {
         DFAgentDescription template = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 

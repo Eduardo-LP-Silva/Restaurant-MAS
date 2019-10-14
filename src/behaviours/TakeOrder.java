@@ -21,7 +21,12 @@ public class TakeOrder extends CyclicBehaviour
 
             String meal = order.getContent();
 
-            //TODO Check kitchen if meal is available
+            //FIPA-REQUEST: waiter - waiter, waiter - kitchen
+            //Other protocol (cfp ?): Waiter - customer
+            //TODO Ask kitchen / waiter about meal
+            //TODO Advise based on obtained information
+            //Add max waiting time / minminum meal quality to customer ?
+            //Add boolean gotDesiredMeal to customer
         }
         else
             block();
