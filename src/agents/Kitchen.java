@@ -1,13 +1,37 @@
-package utils;
+package agents;
 
 import java.util.HashMap;
 import java.util.Random;
 
-public class Kitchen {
+import jade.core.Agent;
+import jade.domain.DFService;
+import jade.domain.FIPAException;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
+import utils.Pair;
+
+public class Kitchen extends Agent 
+{
+    private static final long serialVersionUID = 1L;
     private HashMap<String, Pair<Integer, Integer>> meals; //<Dish, <CookingTime, WellPreparedProbability>>
     private String[] dishes;
 
-    public Kitchen() {
+    protected void setup() {
+        DFAgentDescription dfd = new DFAgentDescription();
+        ServiceDescription sd = new ServiceDescription();
+
+        dfd.setName(this.getAID());
+        sd.setType("kitchen-service");
+        sd.setName("mas-restaurant");
+        dfd.addServices(sd);
+
+        try {
+            DFService.register(this, dfd);
+        }
+        catch(FIPAException e) {
+            e.printStackTrace();
+        }
+
         meals = new HashMap<String, Pair<Integer, Integer>>();
         dishes = new String[] {
             "onion soup",
@@ -30,6 +54,10 @@ public class Kitchen {
         };
 
         this.generateMeals();
+        
+        System.out.println("Kitchen " + this.getAID().getLocalName() + " at your service.");
+        
+        //Wait for client requests
     }
 
     private void generateMeals() {
@@ -51,5 +79,16 @@ public class Kitchen {
         Random rand = new Random();
 
         return dishes[rand.nextInt(dishes.length)];
+    }
+
+    protected void takeDown() {
+        try {
+            DFService.deregister(this);
+        }
+        catch(FIPAException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Kitchen " + this.getAID().getLocalName() + " shutting down.");
     }
 }
