@@ -29,7 +29,7 @@ public class Waiter extends Agent
             e.printStackTrace();
         }
         
-        System.out.println("Waiter " + this.getAID().getName() + " at your service.");
+        System.out.println("Waiter " + this.getAID().getLocalName() + " at your service.");
 
         if(kitchen == null)
             kitchen = new Kitchen();
@@ -45,6 +45,6 @@ public class Waiter extends Agent
             e.printStackTrace();
         }
 
-        System.out.println("Waiter " + this.getAID().getName() + " going home.");
+        System.out.println("Waiter " + this.getAID().getLocalName() + " going home.");
     }
 }
