@@ -9,6 +9,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 
 public class ServiceSearch extends SimpleBehaviour {
+    private static final long serialVersionUID = -4766123904483710759L;
     private Customer customer;
 
     public ServiceSearch(Customer a) {

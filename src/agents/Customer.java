@@ -5,6 +5,7 @@ import jade.core.AID;
 import jade.core.Agent;
 
 public class Customer extends Agent {
+    private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private AID waiter = null;
 
