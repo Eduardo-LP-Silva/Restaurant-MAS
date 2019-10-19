@@ -4,22 +4,25 @@ import agents.Waiter;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
-public class TakeOrder extends CyclicBehaviour
+public class TakeRequest extends CyclicBehaviour
 {
+    private static final long serialVersionUID = 7818256748738825651L;
+
     @Override
     public void action() {
         Waiter myWaiter = (Waiter) myAgent;
-        ACLMessage order = myAgent.receive();
+        ACLMessage msg = myAgent.receive();
 
-        if(order != null) {
-            ACLMessage reply = order.createReply();
+        if(msg != null) {
+            ACLMessage reply = msg.createReply();
 
+            //TODO Check if message is from client or waiter
             if(myWaiter.getNoCustomers() > 3) {
                 reply.setPerformative(ACLMessage.REFUSE);
                 reply.setContent("busy");
             }
 
-            String meal = order.getContent();
+            String meal = msg.getContent();
 
             //FIPA-REQUEST: waiter - waiter, waiter - kitchen
             //Other protocol (cfp ?): Waiter - customer
