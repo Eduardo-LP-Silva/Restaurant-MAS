@@ -3,7 +3,7 @@ package agents;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import behaviours.TakeOrder;
+import behaviours.TakeRequest;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -40,8 +40,10 @@ public class Waiter extends Agent
 
         if(!searchForKitchen())
             this.doDelete();
+
         
-        this.addBehaviour(new TakeOrder());
+        
+        this.addBehaviour(new TakeRequest());
     }
 
     private Integer searchKitchen(String dish, String property) {
@@ -94,4 +96,8 @@ public class Waiter extends Agent
     public int getNoCustomers() {
         return customers.size();
     }  
+
+    public AID getKitchen() {
+        return kitchen;
+    }
 }
