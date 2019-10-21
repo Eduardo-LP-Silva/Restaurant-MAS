@@ -7,11 +7,11 @@ import jade.core.Agent;
 public class Customer extends Agent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
-    private AID waiter = null;
+    private AID[] waiters = null;
 
     @Override
     protected void setup() {
-        System.out.println("Hello! Customer agent " + getAID().getLocalName() + " is ready.");
+        System.out.println("(customer) Hello! Customer " + getAID().getLocalName() + " is ready.");
 
         Object[] args = getArguments();
         if (args != null && args.length == 1) {
@@ -19,27 +19,35 @@ public class Customer extends Agent {
             // standardizing dish name
             desiredDish =  desiredDish.replace("-", " ");
             desiredDish = desiredDish.toLowerCase();
-            System.out.println("I want to eat " + desiredDish);
+            System.out.println("(customer) I want to eat " + desiredDish + "!");
 
 
         } else {
-            System.out.println("No dish specified!");
+            System.out.println("(customer) No dish specified!");
             doDelete();
         }
 
         addBehaviour(new ServiceSearch(this));
     }
 
-    public void setWaiter(AID agent) {
-        waiter = agent;
+    public void setWaiters(AID[] agents) {
+        waiters = agents;
     }
 
-    public AID getWaiter() {
-        return waiter;
+    public AID[] getWaiters() {
+        return waiters;
+    }
+
+    public AID getFirstWaiter() {
+        return waiters[0];
+    }
+
+    public String getDesiredDish() {
+        return desiredDish;
     }
 
     @Override
     protected void takeDown() {
-        System.out.println("Customer agent " + getAID().getLocalName() + " is terminating.");
+        System.out.println("(customer) Customer " + getAID().getLocalName() + " is going home.");
     }
 }
