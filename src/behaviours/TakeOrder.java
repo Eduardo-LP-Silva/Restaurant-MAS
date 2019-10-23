@@ -34,15 +34,21 @@ public class TakeOrder extends CyclicBehaviour
                         break;
                     }
 
-                    content = msg.getContent();
-                    //TODO Evaluate client's mood to decide if to ask the kitchen or another waiter
+                    String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
+                    String dish = customerDetails[0];
+                    int customerMood = Integer.parseInt(customerDetails[1]);
 
-                    //Assuming it asks the kitchen                    
-                    ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
-                    kitchenRequest.addReceiver(((Waiter) myAgent).getKitchen());
-                    kitchenRequest.setConversationId("dish-details");
-                    kitchenRequest.setContent(content); //TODO Change to only have meal
-                    myAgent.send(kitchenRequest);
+                    if(customerMood <= 5) { //Customer mood drops 1 point each 10 mins
+                        //TODO Ask waiter
+                    } 
+                    else {
+                        ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
+                        kitchenRequest.addReceiver(((Waiter) myAgent).getKitchen());
+                        kitchenRequest.setConversationId("dish-details");
+                        kitchenRequest.setContent(dish);
+                        myAgent.send(kitchenRequest);
+                    }
+                                    
                     step = 1;
                 }
                 else
