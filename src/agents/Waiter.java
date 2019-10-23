@@ -1,6 +1,7 @@
 package agents;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import behaviours.TakeOrder;
 import jade.core.AID;
 import jade.core.Agent;
@@ -15,6 +16,7 @@ public class Waiter extends Agent
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
     private ArrayList<String> waiters = new ArrayList<String>();
+    private HashMap<String, int[]> knownDishes = new HashMap<String, int[]>();
     private int customerNo = 0;
     private int tips = 0;
 

@@ -42,7 +42,7 @@ public class TakeOrder extends CyclicBehaviour
                     String dish = customerDetails[0];
                     customerMood = Integer.parseInt(customerDetails[1]);
 
-                    if(customerMood <= 5) { //Customer mood drops 1 point each 10 mins
+                    if(customerMood <= 5) { 
                         //TODO Ask waiter
                     } 
                     else {
@@ -67,9 +67,17 @@ public class TakeOrder extends CyclicBehaviour
 
                 if(msg != null) {
                     content = msg.getContent();
-                    String[] dishDetails = content.split(" "); //Message format: "dish cookigTime preparationRate" 
+                    String[] dishDetails = content.split(" "); //Message format: "dish availability cookigTime preparationRate" 
 
-                    //TODO Advise based on obtained information
+                    //Customer mood drops 1 point each 10 mins | Customer mood += DishPreparation - 5
+                    if(Integer.parseInt(dishDetails[1]) == 0 
+                    || customerMood - (Integer.parseInt(dishDetails[2]) / 10) <= 3 
+                    || customerMood + (Integer.parseInt(dishDetails[3]) - 5) <= 3) {
+                        //TODO Suggest something else (based on known dishes ?)
+                    }
+                    else {
+                        //TODO Order food
+                    }
                 }
                 else
                     block();
