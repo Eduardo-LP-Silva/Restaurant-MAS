@@ -7,9 +7,10 @@ import jade.lang.acl.MessageTemplate;
 
 public class TakeOrder extends CyclicBehaviour
 {
+    private static final long serialVersionUID = 7818256748738825651L;
     private int step = 0;
     private MessageTemplate template;
-    private static final long serialVersionUID = 7818256748738825651L;
+    private int customerMood;
 
     @Override
     public void action() {
@@ -35,8 +36,9 @@ public class TakeOrder extends CyclicBehaviour
                     }
 
                     String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
+                    //TODO Differentiate dish from quickest-dish request (?)
                     String dish = customerDetails[0];
-                    int customerMood = Integer.parseInt(customerDetails[1]);
+                    customerMood = Integer.parseInt(customerDetails[1]);
 
                     if(customerMood <= 5) { //Customer mood drops 1 point each 10 mins
                         //TODO Ask waiter
