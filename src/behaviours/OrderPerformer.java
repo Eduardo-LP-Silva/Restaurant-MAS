@@ -6,6 +6,7 @@ import jade.core.behaviours.BaseInitiator;
 import jade.lang.acl.ACLMessage;
 
 public class OrderPerformer extends BaseInitiator {
+    private static final long serialVersionUID = 2897989135282380056L;
     private Customer customer;
     private AID currentWaiter;
 

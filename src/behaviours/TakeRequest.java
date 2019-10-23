@@ -6,6 +6,8 @@ import jade.lang.acl.ACLMessage;
 
 public class TakeRequest extends CyclicBehaviour
 {
+    private static final long serialVersionUID = 3055341223034464997L;
+
     @Override
     public void action() {
         Kitchen myKitchen = (Kitchen) myAgent;

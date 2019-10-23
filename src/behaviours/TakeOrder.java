@@ -7,9 +7,10 @@ import jade.lang.acl.MessageTemplate;
 
 public class TakeOrder extends CyclicBehaviour
 {
+    private static final long serialVersionUID = 7818256748738825651L;
     private int step = 0;
     private MessageTemplate template;
-    private static final long serialVersionUID = 7818256748738825651L;
+    private int customerMood;
 
     @Override
     public void action() {
@@ -34,18 +35,22 @@ public class TakeOrder extends CyclicBehaviour
                         break;
                     }
 
-                    //TODO Get additional info from client and split message
-                    content = msg.getContent();
-                    //TODO Evaluate client's mood to decide if to ask the kitchen or another waiter
-                    //Add max waiting time / minminum meal quality to customer ?
-                    //Add boolean gotDesiredMeal to customer
+                    String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
+                    //TODO Differentiate dish from quickest-dish request (?)
+                    String dish = customerDetails[0];
+                    customerMood = Integer.parseInt(customerDetails[1]);
 
-                    //Assuming it asks the kitchen                    
-                    ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
-                    kitchenRequest.addReceiver(((Waiter) myAgent).getKitchen());
-                    kitchenRequest.setConversationId("dish-details");
-                    kitchenRequest.setContent(content); //TODO Change to only have meal
-                    myAgent.send(kitchenRequest);
+                    if(customerMood <= 5) { //Customer mood drops 1 point each 10 mins
+                        //TODO Ask waiter
+                    } 
+                    else {
+                        ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
+                        kitchenRequest.addReceiver(((Waiter) myAgent).getKitchen());
+                        kitchenRequest.setConversationId("dish-details");
+                        kitchenRequest.setContent(dish);
+                        myAgent.send(kitchenRequest);
+                    }
+                                    
                     step = 1;
                 }
                 else
