@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.Random;
+
 import behaviours.ServiceSearch;
 import jade.core.AID;
 import jade.core.Agent;
@@ -8,12 +10,14 @@ public class Customer extends Agent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private AID[] waiters = null;
+    private int mood;
 
     @Override
     protected void setup() {
+        Object[] args = getArguments();
+        
         System.out.println("(customer) Hello! Customer " + getAID().getLocalName() + " is ready.");
 
-        Object[] args = getArguments();
         if (args != null && args.length == 1) {
             desiredDish = (String) args[0];
             // standardizing dish name
@@ -21,7 +25,8 @@ public class Customer extends Agent {
             desiredDish = desiredDish.toLowerCase();
             System.out.println("(customer) I want to eat " + desiredDish + "!");
 
-
+            Random random = new Random();
+            mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
         } else {
             System.out.println("(customer) No dish specified!");
             doDelete();

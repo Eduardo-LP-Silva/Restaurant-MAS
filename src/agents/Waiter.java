@@ -10,15 +10,15 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import jade.lang.acl.ACLMessage;
 
 public class Waiter extends Agent 
 {
+    private static final long serialVersionUID = 7110642579660810600L;
+    private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
     private ArrayList<String> waiters = new ArrayList<String>();
     private HashMap<AID, String> customers = new HashMap<AID, String>();
-    private static final int MAX_CLIENT_NO = 3;
-    private static final long serialVersionUID = 7110642579660810600L;
+    private int tips = 0;
 
     protected void setup() {        
         DFAgentDescription dfd = new DFAgentDescription();
@@ -41,17 +41,7 @@ public class Waiter extends Agent
         if(!searchForKitchen())
             this.doDelete();
 
-        
-        
         this.addBehaviour(new TakeOrder());
-    }
-
-    private Integer searchKitchen(String dish, String property) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-        
-        request.setContent("");
-
-        return 0;
     }
 
     private boolean searchForKitchen() {
