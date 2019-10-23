@@ -34,7 +34,6 @@ public class TakeOrder extends CyclicBehaviour
                         break;
                     }
 
-                    //TODO Get additional info from client and split message
                     content = msg.getContent();
                     //TODO Evaluate client's mood to decide if to ask the kitchen or another waiter
 
