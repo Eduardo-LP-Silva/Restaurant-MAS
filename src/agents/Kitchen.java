@@ -13,7 +13,7 @@ import utils.Pair;
 public class Kitchen extends Agent 
 {
     private static final long serialVersionUID = 1L;
-    private HashMap<String, Pair<Integer, Integer>> meals; //<Dish, <CookingTime, WellPreparedProbability>>
+    private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
     private String[] dishes;
 
     protected void setup() {
@@ -32,7 +32,7 @@ public class Kitchen extends Agent
             e.printStackTrace();
         }
 
-        meals = new HashMap<String, Pair<Integer, Integer>>();
+        meals = new HashMap<String, int[]>();
         dishes = new String[] {
             "onion soup",
             "escargots",
@@ -62,16 +62,17 @@ public class Kitchen extends Agent
 
     private void generateMeals() {
         Random rand = new Random();
-        Integer cookingTime, wellPreparedProb;
+        Integer cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
             cookingTime = rand.nextInt(85) + 5;
             wellPreparedProb = rand.nextInt(9) + 1;
-            meals.put(dishes[i], new Pair<Integer,Integer>(cookingTime, wellPreparedProb));
+            availability = rand.nextInt(3) + 1;
+            meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
     }
 
-    public Pair<Integer, Integer> getMealInfo(String dish) {
+    public int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
 
