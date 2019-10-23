@@ -34,6 +34,8 @@ public class TakeOrder extends CyclicBehaviour
                         myAgent.send(reply);
                         break;
                     }
+                    else
+                        ((Waiter) myAgent).addCustomer();
 
                     String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
                     //TODO Differentiate dish from quickest-dish request (?)
