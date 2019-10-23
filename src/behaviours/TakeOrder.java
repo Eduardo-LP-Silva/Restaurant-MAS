@@ -5,7 +5,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-public class TakeRequest extends CyclicBehaviour
+public class TakeOrder extends CyclicBehaviour
 {
     private int step = 0;
     private MessageTemplate template;
