@@ -11,6 +11,7 @@ import jade.domain.FIPAException;
 public class ServiceSearch extends SimpleBehaviour {
     private static final long serialVersionUID = -4766123904483710759L;
     private Customer customer;
+    private int numberOfWaiters = 0;
 
     public ServiceSearch(Customer a) {
         this.customer = a;
@@ -26,14 +27,15 @@ public class ServiceSearch extends SimpleBehaviour {
         try {
             DFAgentDescription[] result = DFService.search(myAgent, template);
             AID[] waiters = new AID[result.length];
+            numberOfWaiters = result.length;
             for(int i=0; i<result.length; i++) {
                 waiters[i] = result[i].getName();
-                System.out.println("Found one waiter: " + waiters[i].getLocalName());
+                System.out.println("(customer) Found one waiter: " + waiters[i].getLocalName());
             }
 
             // found at least one waiter
             if(result.length > 0) {
-                customer.setWaiter(waiters[0]);
+                customer.setWaiters(waiters);
             }
 
         } catch (FIPAException fe) {
@@ -43,7 +45,7 @@ public class ServiceSearch extends SimpleBehaviour {
 
     @Override
     public boolean done() {
-        if(customer.getWaiter() != null) {
+        if(customer.getWaiters().length == numberOfWaiters) {
             return true;
         }
 
