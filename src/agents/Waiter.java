@@ -78,6 +78,11 @@ public class Waiter extends Agent
         return true;
     }
 
+    protected void takeDown() {
+        deRegister();
+        System.out.println("Waiter " + this.getAID().getLocalName() + " going home.");
+    }
+
     public void deRegister()
     {
         try {
@@ -86,9 +91,6 @@ public class Waiter extends Agent
         catch(FIPAException e) {
             e.printStackTrace();
         }
-    }
-
-        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " going home.");
     }
 
     public int getNoCustomers() {
