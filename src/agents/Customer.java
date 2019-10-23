@@ -10,9 +10,7 @@ public class Customer extends Agent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private AID[] waiters = null;
-    private int maxWaitingTime;
-    private int minMealQuality;
-    private boolean gotDesiredMeal = false;
+    private int mood;
 
     @Override
     protected void setup() {
@@ -28,8 +26,7 @@ public class Customer extends Agent {
             System.out.println("(customer) I want to eat " + desiredDish + "!");
 
             Random random = new Random();
-            maxWaitingTime = random.nextInt(105) + 15;
-            minMealQuality = random.nextInt(9) + 1;
+            mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
         } else {
             System.out.println("(customer) No dish specified!");
             doDelete();

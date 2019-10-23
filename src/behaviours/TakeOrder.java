@@ -37,8 +37,6 @@ public class TakeOrder extends CyclicBehaviour
                     //TODO Get additional info from client and split message
                     content = msg.getContent();
                     //TODO Evaluate client's mood to decide if to ask the kitchen or another waiter
-                    //Add max waiting time / minminum meal quality to customer ?
-                    //Add boolean gotDesiredMeal to customer
 
                     //Assuming it asks the kitchen                    
                     ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);

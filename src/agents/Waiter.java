@@ -41,17 +41,7 @@ public class Waiter extends Agent
         if(!searchForKitchen())
             this.doDelete();
 
-        
-        
         this.addBehaviour(new TakeOrder());
-    }
-
-    private Integer searchKitchen(String dish, String property) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-        
-        request.setContent("");
-
-        return 0;
     }
 
     private boolean searchForKitchen() {
