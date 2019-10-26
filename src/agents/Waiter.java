@@ -8,6 +8,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 import utils.Dish;
 
 public class Waiter extends Agent 
@@ -83,6 +84,15 @@ public class Waiter extends Agent
         }
     }
 
+    public void askDishDetails(AID receiver, String dish) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+
+        request.addReceiver(receiver);
+        request.setConversationId("dish-details");
+        request.setContent(dish);
+        send(request);
+    }
+
     /**
      * Updates a previously known dish's details.
      * If the information is reliable, it replaces the known details.
@@ -102,6 +112,15 @@ public class Waiter extends Agent
             else
                 knownDishes.set(dishIndex, newDish); 
         }    
+    }
+
+    public void relayRequestToKitchen(String dish) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+
+        request.addReceiver(kitchen);
+        request.setConversationId("start-dish");
+        request.setContent(dish);
+        send(request);
     }
 
     public void addCustomer(AID customer) {
