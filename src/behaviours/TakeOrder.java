@@ -50,9 +50,7 @@ public class TakeOrder extends CyclicBehaviour
 
                 if(msg != null) { //Message: <dish>
                     if(msg.getPerformative() == ACLMessage.REFUSE) {
-                        for(int i = 0; i < myWaiter.getKnownDishes().size(); i++)
-                            if(myWaiter.getKnownDishes().get(i).getName().equals(msg.getContent()))
-                                myWaiter.getKnownDishes().get(i).setAvailability(0);
+                        myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent())).setAvailability(0);
 
                         //TODO Get back to customer and start process again
                     }
@@ -69,6 +67,22 @@ public class TakeOrder extends CyclicBehaviour
         }
     }
 
+    private void evaluateDish(Dish dish) {
+        //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
+        if(dish.getAvailability() == 0) {
+            //TODO Refuse and start process again
+        } 
+        else
+            if(customerMood + dish.getCookingTime() - 15 <= 3 || customerMood + dish.getPreparation() - 5 <= 3) {
+            //TODO Suggest something else (based on known dishes ?)
+            }
+            else {
+                step = 2;
+                myWaiter.relayRequestToKitchen(dish.getName());
+            }
+                
+    }
+
     private void receiveDishDetails(ACLMessage msg) {
         String content = msg.getContent();
         String[] dishDetails = content.split(" "); //Message format: "dish availability cookigTime preparationRate"
@@ -80,16 +94,7 @@ public class TakeOrder extends CyclicBehaviour
         else
             myWaiter.getKnownDishes().add(dish);
 
-        //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
-        if(Integer.parseInt(dishDetails[1]) == 0 
-        || customerMood + (Integer.parseInt(dishDetails[2]) - 15) <= 3 
-        || customerMood + (Integer.parseInt(dishDetails[3]) - 5) <= 3) {
-            //TODO Suggest something else (based on known dishes ?)
-        }
-        else 
-            myWaiter.relayRequestToKitchen(dishDetails[0]);
-
-        step = 2;
+        evaluateDish(dish);
     }
 
     private void attendCustomer(ACLMessage msg) {
@@ -108,17 +113,20 @@ public class TakeOrder extends CyclicBehaviour
         String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
         //TODO Differentiate dish from quickest-dish request (?)
         String dish = customerDetails[0];
+        int index;
         customerMood = Integer.parseInt(customerDetails[1]);
 
-        //TODO Check if dish is known
-
-        //TODO Drop one point to customer mood if asking kitchen
-        if(customerMood <= 5) { 
-            //TODO Ask waiter
-        } 
-        else 
-            myWaiter.askDishDetails(myWaiter.getKitchen(), dish);
-
-        step = 1;
+        if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
+            //TODO Drop one point to customer mood if asking kitchen
+            if(customerMood <= 5) { 
+                //TODO Ask waiter
+            } 
+            else 
+                myWaiter.askDishDetails(myWaiter.getKitchen(), dish);
+            
+            step = 1;
+        }
+        else
+            evaluateDish(myWaiter.getKnownDishes().get(index));
     }
 }

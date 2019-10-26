@@ -142,4 +142,12 @@ public class Waiter extends Agent
     public ArrayList<Dish> getKnownDishes() {
         return knownDishes;
     }
+
+    public int getKnownDishIndex(String dishName) {
+        for(int i = 0; i < knownDishes.size(); i++)
+            if(knownDishes.get(i).getName().equals(dishName))
+                return i;
+
+        return -1;
+    }
 }
