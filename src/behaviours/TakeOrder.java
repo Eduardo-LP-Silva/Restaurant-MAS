@@ -107,9 +107,12 @@ public class TakeOrder extends CyclicBehaviour
             myAgent.send(reply);
             return;
         }
-        else
-            myWaiter.addCustomer(msg.getSender());
-
+        
+        myWaiter.addCustomer(msg.getSender());
+        reply.setPerformative(ACLMessage.AGREE);
+        reply.setContent("Waiter " + myWaiter.getName() + " at your service.");
+        myWaiter.send(reply);
+        
         String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
         //TODO Differentiate dish from quickest-dish request (?)
         String dish = customerDetails[0];

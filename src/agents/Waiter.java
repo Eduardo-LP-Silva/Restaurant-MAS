@@ -37,7 +37,7 @@ public class Waiter extends Agent
             e.printStackTrace();
         }
         
-        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " at your service.");
+        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " checking in.");
 
         if(!searchForKitchen())
             this.doDelete();
