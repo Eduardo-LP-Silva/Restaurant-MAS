@@ -43,6 +43,26 @@ public class TakeOrder extends CyclicBehaviour
                     block();
 
                 break;
+
+            case 2:
+                template = MessageTemplate.MatchConversationId("start-dish");
+                msg = myAgent.receive(template);
+
+                if(msg != null) { //Message: <dish>
+                    if(msg.getPerformative() == ACLMessage.REFUSE) {
+                        for(int i = 0; i < myWaiter.getKnownDishes().size(); i++)
+                            if(myWaiter.getKnownDishes().get(i).getName().equals(msg.getContent()))
+                                myWaiter.getKnownDishes().get(i).setAvailability(0);
+
+                        //TODO Get back to customer and start process again
+                    }
+                    else {
+                        //TODO Create new timed behaviour to deliver meal
+                    }
+                }
+                else
+                    block();
+                break;
                 //FIPA-REQUEST: waiter - waiter, waiter - kitchen
             default:
                 return;
@@ -66,10 +86,8 @@ public class TakeOrder extends CyclicBehaviour
         || customerMood + (Integer.parseInt(dishDetails[3]) - 5) <= 3) {
             //TODO Suggest something else (based on known dishes ?)
         }
-        else {
-            //TODO Relay request to kitchen
-            //TODO Deliver food
-        }
+        else 
+            myWaiter.relayRequestToKitchen(dishDetails[0]);
 
         step = 2;
     }
@@ -92,18 +110,15 @@ public class TakeOrder extends CyclicBehaviour
         String dish = customerDetails[0];
         customerMood = Integer.parseInt(customerDetails[1]);
 
+        //TODO Check if dish is known
+
         //TODO Drop one point to customer mood if asking kitchen
         if(customerMood <= 5) { 
             //TODO Ask waiter
         } 
-        else {
-            ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
-            kitchenRequest.addReceiver(myWaiter.getKitchen());
-            kitchenRequest.setConversationId("dish-details");
-            kitchenRequest.setContent(dish);
-            myAgent.send(kitchenRequest);
-        }
-        
+        else 
+            myWaiter.askDishDetails(myWaiter.getKitchen(), dish);
+
         step = 1;
     }
 }
