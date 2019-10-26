@@ -94,4 +94,8 @@ public class Waiter extends Agent
     public AID getKitchen() {
         return kitchen;
     }
+
+    public HashMap<String, int[]> getKnownDishes() {
+        return knownDishes;
+    }
 }

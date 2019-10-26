@@ -16,6 +16,7 @@ public class TakeOrder extends CyclicBehaviour
     public void action() {
         ACLMessage msg, reply;
         String content;
+        Waiter myWaiter = (Waiter) myAgent;
 
         switch(step) {
             case 0:
@@ -28,26 +29,27 @@ public class TakeOrder extends CyclicBehaviour
                 if(msg != null) {
                     reply = msg.createReply();
 
-                    if(((Waiter) myAgent).getNoCustomers() > 3) {
+                    if(myWaiter.getNoCustomers() > 3) {
                         reply.setPerformative(ACLMessage.REFUSE);
                         reply.setContent("busy");
                         myAgent.send(reply);
                         break;
                     }
                     else
-                        ((Waiter) myAgent).addCustomer();
+                        myWaiter.addCustomer();
 
                     String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
                     //TODO Differentiate dish from quickest-dish request (?)
                     String dish = customerDetails[0];
                     customerMood = Integer.parseInt(customerDetails[1]);
 
+                    //TODO Drop one point to customer mood if asking kitchen
                     if(customerMood <= 5) { 
                         //TODO Ask waiter
                     } 
                     else {
                         ACLMessage kitchenRequest = new ACLMessage(ACLMessage.REQUEST);
-                        kitchenRequest.addReceiver(((Waiter) myAgent).getKitchen());
+                        kitchenRequest.addReceiver(myWaiter.getKitchen());
                         kitchenRequest.setConversationId("dish-details");
                         kitchenRequest.setContent(dish);
                         myAgent.send(kitchenRequest);
@@ -68,10 +70,38 @@ public class TakeOrder extends CyclicBehaviour
                 if(msg != null) {
                     content = msg.getContent();
                     String[] dishDetails = content.split(" "); //Message format: "dish availability cookigTime preparationRate" 
+                    int[] dish = {Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
+                        Integer.parseInt(dishDetails[3])};
+                        
+                    //If it asked the kitchen, replace any inconsistencies
+                    //else only update the quantity if lower than known
+                    if(myWaiter.getKnownDishes().containsKey(dishDetails[0])) {
+                        int[] knownDish = myWaiter.getKnownDishes().get(dishDetails[0]);
 
-                    //Customer mood drops 1 point each 10 mins | Customer mood += DishPreparation - 5
+                        if(msg.getSender().getName().equals(myWaiter.getName())) {
+                            boolean different = false;
+
+                            for(int i = 0; i < knownDish.length; i++) 
+                                if(knownDish[i] != dish[i]) {
+                                    knownDish[i] = dish[i];
+                                    different = true;
+                                }
+
+                            if(different)
+                                myWaiter.getKnownDishes().put(dishDetails[0], knownDish);
+                        }
+                        else
+                            if(dish[0] < knownDish[0]) {
+                                knownDish[0] = dish[0];
+                                myWaiter.getKnownDishes().put(dishDetails[0], knownDish);
+                            }    
+                    }
+                    else
+                        myWaiter.getKnownDishes().put(dishDetails[0], dish);
+            
+                    //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
                     if(Integer.parseInt(dishDetails[1]) == 0 
-                    || customerMood - (Integer.parseInt(dishDetails[2]) / 10) <= 3 
+                    || customerMood + (Integer.parseInt(dishDetails[2]) - 15) <= 3 
                     || customerMood + (Integer.parseInt(dishDetails[3]) - 5) <= 3) {
                         //TODO Suggest something else (based on known dishes ?)
                     }
