@@ -8,6 +8,8 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
+import utils.Dish;
 
 public class Waiter extends Agent 
 {
@@ -15,7 +17,8 @@ public class Waiter extends Agent
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
     private ArrayList<String> waiters = new ArrayList<String>();
-    private int customerNo = 0;
+    private ArrayList<Dish> knownDishes = new ArrayList<Dish>();
+    private ArrayList<AID> customers = new ArrayList<AID>();
     private int tips = 0;
 
     protected void setup() {        
@@ -81,15 +84,70 @@ public class Waiter extends Agent
         }
     }
 
-    public void addCustomer() {
-        customerNo++;
+    public void askDishDetails(AID receiver, String dish) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+
+        request.addReceiver(receiver);
+        request.setConversationId("dish-details");
+        request.setContent(dish);
+        send(request);
+    }
+
+    /**
+     * Updates a previously known dish's details.
+     * If the information is reliable, it replaces the known details.
+     * Else if the previous information was reliable it only updates the quantity, otherwise it replaces all the details
+     * @param newDish The known dish with possible new details
+     */
+    public void updateKnowDish(Dish newDish) {
+        int dishIndex = knownDishes.indexOf(newDish);
+        
+        if(newDish.isReliable())
+            knownDishes.set(dishIndex, newDish);
+        else {
+            Dish knownDish = knownDishes.get(dishIndex);
+
+            if(knownDish.isReliable() && newDish.getAvailability() < knownDish.getAvailability())
+                knownDish.setAvailability(newDish.getAvailability());
+            else
+                knownDishes.set(dishIndex, newDish); 
+        }    
+    }
+
+    public void relayRequestToKitchen(String dish) {
+        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+
+        request.addReceiver(kitchen);
+        request.setConversationId("start-dish");
+        request.setContent(dish);
+        send(request);
+    }
+
+    public void addCustomer(AID customer) {
+        customers.add(customer);
+    }
+
+    public boolean isBusy() {
+        return customers.size() >= MAX_CLIENT_NO;
     }
 
     public int getNoCustomers() {
-        return customerNo;
+        return customers.size();
     }  
 
     public AID getKitchen() {
         return kitchen;
+    }
+
+    public ArrayList<Dish> getKnownDishes() {
+        return knownDishes;
+    }
+
+    public int getKnownDishIndex(String dishName) {
+        for(int i = 0; i < knownDishes.size(); i++)
+            if(knownDishes.get(i).getName().equals(dishName))
+                return i;
+
+        return -1;
     }
 }
