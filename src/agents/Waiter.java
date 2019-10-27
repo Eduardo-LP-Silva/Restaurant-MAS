@@ -18,7 +18,7 @@ public class Waiter extends Agent
     private AID kitchen;
     private ArrayList<String> waiters = new ArrayList<String>();
     private ArrayList<Dish> knownDishes = new ArrayList<Dish>();
-    private ArrayList<AID> customers = new ArrayList<AID>();
+    private int noCustomers = 0;
     private int tips = 0;
 
     protected void setup() {        
@@ -84,15 +84,6 @@ public class Waiter extends Agent
         }
     }
 
-    public void askDishDetails(AID receiver, String dish) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-
-        request.addReceiver(receiver);
-        request.setConversationId("dish-details");
-        request.setContent(dish);
-        send(request);
-    }
-
     /**
      * Updates a previously known dish's details.
      * If the information is reliable, it replaces the known details.
@@ -114,29 +105,33 @@ public class Waiter extends Agent
         }    
     }
 
-    public void relayRequestToKitchen(String dish) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-
-        request.addReceiver(kitchen);
-        request.setConversationId("start-dish");
-        request.setContent(dish);
-        send(request);
+    public void addCustomer() {
+        noCustomers++;
     }
 
-    public void addCustomer(AID customer) {
-        customers.add(customer);
+    public void removeCustomer() {
+        noCustomers--;
     }
 
     public boolean isBusy() {
-        return customers.size() >= MAX_CLIENT_NO;
+        return noCustomers >= MAX_CLIENT_NO;
     }
 
     public void printMessage(String message) {
         System.out.println("(Waiter " + getAID().getLocalName() + ") " + message);
     }
 
+    public void sendMessage(AID aid, int performative, String conversationID, String content) {
+        ACLMessage msg = new ACLMessage(performative);
+        msg.addReceiver(aid);
+        msg.setLanguage("English");
+        msg.setConversationId(conversationID);
+        msg.setContent(content);
+        send(msg);
+    }
+
     public int getNoCustomers() {
-        return customers.size();
+        return noCustomers;
     }  
 
     public AID getKitchen() {
