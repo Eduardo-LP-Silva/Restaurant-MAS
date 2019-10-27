@@ -46,6 +46,7 @@ public class ServiceSearch extends SimpleBehaviour {
     @Override
     public boolean done() {
         if(customer.getWaiters().length == numberOfWaiters) {
+            customer.addBehaviour(new OrderPerformer(customer));
             return true;
         }
 

@@ -55,7 +55,7 @@ public class Kitchen extends Agent
 
         this.generateMeals();
         
-        System.out.println("Kitchen " + this.getAID().getLocalName() + " at your service.");
+        System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " at your service.");
         
         //Wait for client requests
     }
@@ -90,6 +90,6 @@ public class Kitchen extends Agent
             e.printStackTrace();
         }
 
-        System.out.println("Kitchen " + this.getAID().getLocalName() + " shutting down.");
+        System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " shutting down.");
     }
 }

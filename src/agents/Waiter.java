@@ -71,7 +71,7 @@ public class Waiter extends Agent
 
     protected void takeDown() {
         deRegister();
-        System.out.println("Waiter " + this.getAID().getLocalName() + " going home.");
+        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " going home.");
     }
 
     public void deRegister()

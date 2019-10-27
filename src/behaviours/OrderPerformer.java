@@ -10,9 +10,14 @@ public class OrderPerformer extends BaseInitiator {
     private Customer customer;
     private AID currentWaiter;
 
-    OrderPerformer(Customer c) {
+    public OrderPerformer(Customer c) {
         customer = c;
         currentWaiter = customer.getFirstWaiter();
+    }
+
+    @Override
+    protected void handleAgree(ACLMessage agree) {
+        System.out.println("(customer) Waiting for my dish.");
     }
 
     @Override
