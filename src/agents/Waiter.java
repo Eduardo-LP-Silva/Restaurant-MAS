@@ -36,13 +36,13 @@ public class Waiter extends Agent
         catch(FIPAException e) {
             e.printStackTrace();
         }
-        
-        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " checking in.");
+
+        printMessage("Checking in.");
 
         if(!searchForKitchen())
             this.doDelete();
 
-        this.addBehaviour(new TakeOrder());
+        this.addBehaviour(new TakeOrder(this));
     }
 
     private boolean searchForKitchen() {
@@ -58,7 +58,7 @@ public class Waiter extends Agent
             if(kitchenSearch.length > 0)
                 kitchen = kitchenSearch[0].getName();
             else {
-                System.out.println("Could't find the kitchen - Waiter " + getName());
+                printMessage("Could't find the kitchen...");
                 return false;
             }    
         }
@@ -71,7 +71,7 @@ public class Waiter extends Agent
 
     protected void takeDown() {
         deRegister();
-        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " going home.");
+        printMessage("Going home.");
     }
 
     public void deRegister()
@@ -129,6 +129,10 @@ public class Waiter extends Agent
 
     public boolean isBusy() {
         return customers.size() >= MAX_CLIENT_NO;
+    }
+
+    public void printMessage(String message) {
+        System.out.println("(Waiter " + getAID().getLocalName() + ") " + message);
     }
 
     public int getNoCustomers() {

@@ -25,7 +25,7 @@ public class OrderPerformer extends BaseInitiator {
         ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
         msg.addReceiver(currentWaiter);
         msg.setLanguage("English");
-        msg.setConversationId("order-request");
+        msg.setConversationId("waiter-request");
         msg.setContent(customer.getDesiredDish());
         customer.send(msg);
         return msg;

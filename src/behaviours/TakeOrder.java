@@ -12,19 +12,22 @@ public class TakeOrder extends CyclicBehaviour
     private int step = 0;
     private MessageTemplate template;
     private int customerMood;
-    private Waiter myWaiter = (Waiter) myAgent;
+    private Waiter myWaiter;
+
+    public TakeOrder(Waiter waiter) {
+        myWaiter = waiter;
+    }
 
     @Override
     public void action() {
         ACLMessage msg;
 
         switch(step) {
-            //Receive request from customer
+            //Attend customer
             case 0:
-                //Other protocol (cfp ?): Waiter - customer
-                template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST), //TODO Change performative
-                    MessageTemplate.MatchConversationId("order-request"));
-                msg = myAgent.receive(template);
+                template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.REQUEST),
+                    MessageTemplate.MatchConversationId("waiter-request"));
+                msg = myWaiter.receive(template);
 
                 if(msg != null) 
                     attendCustomer(msg);
@@ -34,8 +37,19 @@ public class TakeOrder extends CyclicBehaviour
                 break;
 
             case 1:
+                template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.CFP),
+                        MessageTemplate.MatchConversationId("order-request"));
+                msg = myWaiter.receive(template);
+
+                if(msg != null)
+                    getOrder(msg);
+                else
+                    block();
+                break;
+
+            case 2:
                 template = MessageTemplate.MatchConversationId("dish-details");
-                msg = myAgent.receive(template);
+                msg = myWaiter.receive(template);
 
                 if(msg != null) 
                     receiveDishDetails(msg);
@@ -44,9 +58,9 @@ public class TakeOrder extends CyclicBehaviour
 
                 break;
 
-            case 2:
+            case 3:
                 template = MessageTemplate.MatchConversationId("start-dish");
-                msg = myAgent.receive(template);
+                msg = myWaiter.receive(template);
 
                 if(msg != null) { //Message: <dish>
                     if(msg.getPerformative() == ACLMessage.REFUSE) {
@@ -97,39 +111,42 @@ public class TakeOrder extends CyclicBehaviour
         evaluateDish(dish);
     }
 
+    private void getOrder(ACLMessage msg) {
+        String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
+        String dish = customerDetails[0];
+        int index;
+
+        customerMood = Integer.parseInt(customerDetails[1]);
+
+        if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
+            //TODO Drop one point to customer mood if asking kitchen
+            if(customerMood <= 5) {
+                //TODO Ask waiter
+            }
+            else
+                myWaiter.askDishDetails(myWaiter.getKitchen(), dish);
+
+            step = 1;
+        }
+        else
+            evaluateDish(myWaiter.getKnownDishes().get(index));
+    }
+
     private void attendCustomer(ACLMessage msg) {
-       
         ACLMessage reply = msg.createReply();
 
         if(myWaiter.isBusy()) {
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("busy");
-            myAgent.send(reply);
+            myWaiter.send(reply);
+            myWaiter.printMessage("I'm sorry, I'm a bit busy at the moment.");
             return;
         }
         
         myWaiter.addCustomer(msg.getSender());
         reply.setPerformative(ACLMessage.AGREE);
-        reply.setContent("Waiter " + myWaiter.getName() + " at your service.");
         myWaiter.send(reply);
-        
-        String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
-        //TODO Differentiate dish from quickest-dish request (?)
-        String dish = customerDetails[0];
-        int index;
-        customerMood = Integer.parseInt(customerDetails[1]);
-
-        if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
-            //TODO Drop one point to customer mood if asking kitchen
-            if(customerMood <= 5) { 
-                //TODO Ask waiter
-            } 
-            else 
-                myWaiter.askDishDetails(myWaiter.getKitchen(), dish);
-            
-            step = 1;
-        }
-        else
-            evaluateDish(myWaiter.getKnownDishes().get(index));
+        myWaiter.printMessage("I'll gladly be your waiter this evening, " + msg.getSender().getLocalName() + ".");
+        step = 1;
     }
 }
