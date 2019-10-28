@@ -2,6 +2,7 @@ package agents;
 
 import java.util.Random;
 
+import behaviours.OrderPerformer;
 import behaviours.ServiceSearch;
 import jade.core.AID;
 import jade.core.Agent;
@@ -32,15 +33,11 @@ public class Customer extends Agent {
             doDelete();
         }
 
-        addBehaviour(new ServiceSearch(this));
+        addBehaviour(new ServiceSearch(this, 1000));
     }
 
     public void setWaiters(AID[] agents) {
         waiters = agents;
-    }
-
-    public AID[] getWaiters() {
-        return waiters;
     }
 
     public AID getFirstWaiter() {
@@ -54,5 +51,9 @@ public class Customer extends Agent {
     @Override
     protected void takeDown() {
         System.out.println("(customer) Customer " + getAID().getLocalName() + " is going home.");
+    }
+
+    public void startOrder() {
+        // addBehaviour(new OrderPerformer(this));
     }
 }
