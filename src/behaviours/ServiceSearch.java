@@ -35,7 +35,7 @@ public class ServiceSearch extends TickerBehaviour {
             // found at least one waiter
             if(result.length > 0) {
                 customer.setWaiters(waiters);
-                customer.startOrder();
+                customer.getAvailableWaiter();
             }
 
         } catch (FIPAException fe) {
