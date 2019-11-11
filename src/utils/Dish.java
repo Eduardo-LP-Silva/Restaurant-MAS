@@ -27,6 +27,10 @@ public class Dish {
         this.availability = availability;
     }
 
+    public void decrementAvailability() {
+        availability--;
+    }
+
     public String getName() {
         return name;
     }

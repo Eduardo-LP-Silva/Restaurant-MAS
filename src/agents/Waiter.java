@@ -16,9 +16,9 @@ public class Waiter extends Agent
     private static final long serialVersionUID = 7110642579660810600L;
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
-    private ArrayList<String> waiters = new ArrayList<String>();
-    private ArrayList<Dish> knownDishes = new ArrayList<Dish>();
-    private ArrayList<AID> customers = new ArrayList<AID>();
+    private ArrayList<String> waiters = new ArrayList<>();
+    private ArrayList<Dish> knownDishes = new ArrayList<>();
+    private int noCustomers = 0;
     private int tips = 0;
 
     protected void setup() {        
@@ -36,13 +36,13 @@ public class Waiter extends Agent
         catch(FIPAException e) {
             e.printStackTrace();
         }
-        
-        System.out.println("(waiter) Waiter " + this.getAID().getLocalName() + " checking in.");
+
+        printMessage("Checking in.");
 
         if(!searchForKitchen())
             this.doDelete();
 
-        this.addBehaviour(new TakeOrder());
+        this.addBehaviour(new TakeOrder(this));
     }
 
     private boolean searchForKitchen() {
@@ -58,7 +58,7 @@ public class Waiter extends Agent
             if(kitchenSearch.length > 0)
                 kitchen = kitchenSearch[0].getName();
             else {
-                System.out.println("Could't find the kitchen - Waiter " + getName());
+                printMessage("Could't find the kitchen...");
                 return false;
             }    
         }
@@ -71,10 +71,10 @@ public class Waiter extends Agent
 
     protected void takeDown() {
         deRegister();
-        System.out.println("Waiter " + this.getAID().getLocalName() + " going home.");
+        printMessage("Going home.");
     }
 
-    public void deRegister()
+    private void deRegister()
     {
         try {
             DFService.deregister(this);
@@ -82,15 +82,6 @@ public class Waiter extends Agent
         catch(FIPAException e) {
             e.printStackTrace();
         }
-    }
-
-    public void askDishDetails(AID receiver, String dish) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
-
-        request.addReceiver(receiver);
-        request.setConversationId("dish-details");
-        request.setContent(dish);
-        send(request);
     }
 
     /**
@@ -114,26 +105,41 @@ public class Waiter extends Agent
         }    
     }
 
-    public void relayRequestToKitchen(String dish) {
-        ACLMessage request = new ACLMessage(ACLMessage.REQUEST);
+    public Dish suggestOtherDish(Dish originalDish, int customerMood) {
 
-        request.addReceiver(kitchen);
-        request.setConversationId("start-dish");
-        request.setContent(dish);
-        send(request);
+
+
+        return null;
     }
 
-    public void addCustomer(AID customer) {
-        customers.add(customer);
+    public void addCustomer() {
+        noCustomers++;
+    }
+
+    public void addTip(int tip) {
+        tips += tip;
+    }
+
+    public void removeCustomer() {
+        noCustomers--;
     }
 
     public boolean isBusy() {
-        return customers.size() >= MAX_CLIENT_NO;
+        return noCustomers >= MAX_CLIENT_NO;
     }
 
-    public int getNoCustomers() {
-        return customers.size();
-    }  
+    public void printMessage(String message) {
+        System.out.println("(Waiter " + getAID().getLocalName() + ") " + message);
+    }
+
+    public void sendMessage(AID aid, int performative, String conversationID, String content) {
+        ACLMessage msg = new ACLMessage(performative);
+        msg.addReceiver(aid);
+        msg.setLanguage("English");
+        msg.setConversationId(conversationID);
+        msg.setContent(content);
+        send(msg);
+    }
 
     public AID getKitchen() {
         return kitchen;
@@ -141,6 +147,10 @@ public class Waiter extends Agent
 
     public ArrayList<Dish> getKnownDishes() {
         return knownDishes;
+    }
+
+    public int getTips() {
+        return tips;
     }
 
     public int getKnownDishIndex(String dishName) {
