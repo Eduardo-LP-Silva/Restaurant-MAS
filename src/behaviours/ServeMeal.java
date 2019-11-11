@@ -28,7 +28,7 @@ public class ServeMeal extends WakerBehaviour {
     public void onWake() {
         switch(step) {
             case 0:
-                myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                         "meal-delivering", dish);
                 myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
                 step = 1;
