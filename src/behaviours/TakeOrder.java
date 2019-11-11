@@ -8,8 +8,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Dish;
 
-public class TakeOrder extends CyclicBehaviour
-{
+public class TakeOrder extends CyclicBehaviour{
+    
     private static final long serialVersionUID = 7818256748738825651L;
     private int step = 0;
     private int customerMood;
@@ -146,6 +146,14 @@ public class TakeOrder extends CyclicBehaviour
 
     private void receiveDishDetails(ACLMessage msg) {
         String content = msg.getContent();
+
+        if(content.equals("not-found")) {
+            myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                    msg.getConversationId(), "not-found");
+            step = 1;
+            return;
+        }
+
         String[] dishDetails = content.split(" "); //Message format: "dish availability cookingTime preparationRate"
         boolean reliable = msg.getSender().getName().equals(myWaiter.getKitchen().getName());
         Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
@@ -153,7 +161,7 @@ public class TakeOrder extends CyclicBehaviour
         String infoSrc;
             
         if(myWaiter.getKnownDishes().contains(dish)) 
-            myWaiter.updateKnowDish(dish);
+            myWaiter.updateKnownDish(dish);
         else
             myWaiter.getKnownDishes().add(dish);
 

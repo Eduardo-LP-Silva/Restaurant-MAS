@@ -3,12 +3,11 @@ package agents;
 import java.util.HashMap;
 import java.util.Random;
 
-import jade.core.Agent;
+import behaviours.TakeRequest;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import utils.Pair;
 
 public class Kitchen extends RestaurantAgent
 {
@@ -59,7 +58,8 @@ public class Kitchen extends RestaurantAgent
         
         System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " at your service.");
         
-        //Wait for client requests
+        //Wait for Waiter requests
+        this.addBehaviour(new TakeRequest(this));
     }
 
     private void generateMeals() {
@@ -72,6 +72,10 @@ public class Kitchen extends RestaurantAgent
             availability = rand.nextInt(3) + 1;
             meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
+    }
+
+    public Boolean checkMeal(String dish) {
+        return meals.containsKey(dish);
     }
 
     public int[] getMealInfo(String dish) {

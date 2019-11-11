@@ -93,7 +93,7 @@ public class Waiter extends RestaurantAgent
      * Else if the previous information was reliable it only updates the quantity, otherwise it replaces all the details
      * @param newDish The known dish with possible new details
      */
-    public void updateKnowDish(Dish newDish) {
+    public void updateKnownDish(Dish newDish) {
         int dishIndex = knownDishes.indexOf(newDish);
         
         if(newDish.isReliable())
