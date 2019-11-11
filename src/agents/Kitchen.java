@@ -3,12 +3,11 @@ package agents;
 import java.util.HashMap;
 import java.util.Random;
 
-import jade.core.Agent;
+import behaviours.TakeRequest;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import utils.Pair;
 
 public class Kitchen extends RestaurantAgent
 {
@@ -52,14 +51,19 @@ public class Kitchen extends RestaurantAgent
             "francesinha",
             "lamb",
             "vegan burger",
-            "omelette"
+            "omelet"
         };
 
         this.generateMeals();
         
         System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " at your service.");
         
-        //Wait for client requests
+        //Wait for Waiter requests
+        this.addBehaviour(new TakeRequest(this));
+    }
+
+    public static String[] getMenu() {
+        return dishes;
     }
 
     private void generateMeals() {
@@ -67,18 +71,22 @@ public class Kitchen extends RestaurantAgent
         Integer cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
-            cookingTime = rand.nextInt(85) + 5;
+            cookingTime = rand.nextInt(9) + 1;
             wellPreparedProb = rand.nextInt(9) + 1;
-            availability = rand.nextInt(3) + 1;
+            availability = rand.nextInt(4) + 1;
             meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
     }
 
-    public int[] getMealInfo(String dish) {
+    private Boolean checkMeal(String dish) {
+        return meals.containsKey(dish);
+    }
+
+    private int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
 
-    public String selectRandomMeal() {
+    private String selectRandomMeal() {
         Random rand = new Random();
 
         return dishes[rand.nextInt(dishes.length)];
