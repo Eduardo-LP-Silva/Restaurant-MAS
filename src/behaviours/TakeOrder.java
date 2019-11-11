@@ -3,6 +3,7 @@ package behaviours;
 import agents.Waiter;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Dish;
@@ -187,7 +188,7 @@ public class TakeOrder extends CyclicBehaviour
         
         myWaiter.addCustomer();
         customerID = msg.getSender();
-        myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, msg.getConversationId(), "ok");
+        myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, msg.getConversationId(), "ok", FIPANames.InteractionProtocol.FIPA_REQUEST);
         myWaiter.printMessage("I'll gladly be your waiter this evening, " + msg.getSender().getLocalName() + ".");
         step = 1;
     }

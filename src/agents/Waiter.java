@@ -130,6 +130,16 @@ public class Waiter extends Agent
         send(msg);
     }
 
+    public void sendMessage(AID aid, int performative, String conversationID, String content, String protocol) {
+        ACLMessage msg = new ACLMessage(performative);
+        msg.setProtocol(protocol);
+        msg.addReceiver(aid);
+        msg.setLanguage("English");
+        msg.setConversationId(conversationID);
+        msg.setContent(content);
+        send(msg);
+    }
+
     public int getNoCustomers() {
         return noCustomers;
     }  
