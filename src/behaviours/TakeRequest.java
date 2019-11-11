@@ -33,7 +33,7 @@ public class TakeRequest extends CyclicBehaviour{
                     } else {
                         reply.setContent("not-found");
                     } 
-                    myKitchen.send(reply);     
+                    myKitchen.send(reply);
                     break;
 
                 case "start-dish":
