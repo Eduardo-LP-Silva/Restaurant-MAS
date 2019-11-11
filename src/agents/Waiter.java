@@ -8,10 +8,11 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import utils.Dish;
 
-public class Waiter extends Agent 
+public class Waiter extends RestaurantAgent
 {
     private static final long serialVersionUID = 7110642579660810600L;
     private static final int MAX_CLIENT_NO = 3;
@@ -21,7 +22,9 @@ public class Waiter extends Agent
     private int noCustomers = 0;
     private int tips = 0;
 
-    protected void setup() {        
+    protected void setup() {
+        role = "Waiter";
+
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 
@@ -107,8 +110,6 @@ public class Waiter extends Agent
 
     public Dish suggestOtherDish(Dish originalDish, int customerMood) {
 
-
-
         return null;
     }
 
@@ -126,19 +127,6 @@ public class Waiter extends Agent
 
     public boolean isBusy() {
         return noCustomers >= MAX_CLIENT_NO;
-    }
-
-    public void printMessage(String message) {
-        System.out.println("(Waiter " + getAID().getLocalName() + ") " + message);
-    }
-
-    public void sendMessage(AID aid, int performative, String conversationID, String content) {
-        ACLMessage msg = new ACLMessage(performative);
-        msg.addReceiver(aid);
-        msg.setLanguage("English");
-        msg.setConversationId(conversationID);
-        msg.setContent(content);
-        send(msg);
     }
 
     public AID getKitchen() {

@@ -3,6 +3,7 @@ package behaviours;
 import agents.Waiter;
 import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Dish;
@@ -92,7 +93,8 @@ public class TakeOrder extends CyclicBehaviour
 
         if(msg.getPerformative() == ACLMessage.REFUSE) {
             myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent())).setAvailability(0);
-            myWaiter.sendMessage(customerID, ACLMessage.FAILURE, "dish-final-check", "unavailable");
+            myWaiter.sendMessage(customerID, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                    "dish-final-check", "unavailable");
             myWaiter.printMessage("I'm sorry, but there's been a mistake. We're out of " + dishInfo[0] + ".");
             step = 1;
         }
@@ -107,7 +109,8 @@ public class TakeOrder extends CyclicBehaviour
         if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
             Dish dish =  myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent()));
             dish.decrementAvailability();
-            myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, "start-dish", dish.getName());
+            myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    "start-dish", dish.getName());
             myWaiter.printMessage("Right away!");
             step = 4;
         }
@@ -123,7 +126,8 @@ public class TakeOrder extends CyclicBehaviour
         //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
         if(dish.getAvailability() == 0) {
             //TODO Don't refuse, suggest something else
-            myWaiter.sendMessage(customerID, ACLMessage.REFUSE, "order-request", "unavailable");
+            myWaiter.sendMessage(customerID, ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                    "order-request", "unavailable");
             myWaiter.printMessage("I'm sorry, it seems that we're all out of " + dish.getName() + ".");
             step = 1;
         } 
@@ -132,7 +136,8 @@ public class TakeOrder extends CyclicBehaviour
             //TODO Suggest something else (based on known dishes ?)
             }
             else {
-                myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, "dish-feedback", dish.getName() + " " + infoSource);
+                myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                        "dish-feedback", dish.getName() + " " + infoSource);
                 myWaiter.printMessage("Excellent choice!");
                 step = 3;
             }
@@ -173,7 +178,8 @@ public class TakeOrder extends CyclicBehaviour
             }
             else {
                 customerMood--;
-                myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, "dish-details", dish);
+                myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                        "dish-details", dish);
                 myWaiter.printMessage("Hold on a minute, let me check with the kitchen staff.");
             }
 
@@ -185,16 +191,19 @@ public class TakeOrder extends CyclicBehaviour
 
     private void attendCustomer(ACLMessage msg) {
         if(myWaiter.isBusy()) {
-            myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, msg.getConversationId(), "busy");
+            myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    msg.getConversationId(), "busy");
             myWaiter.printMessage("I'm sorry, I'm a bit busy at the moment.");
             return;
         }
         
         myWaiter.addCustomer();
         customerID = msg.getSender();
-        myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, msg.getConversationId(), "ok");
+        myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                msg.getConversationId(), "ok");
         myWaiter.printMessage("I'll gladly be your waiter this evening, " + msg.getSender().getLocalName() + ".");
-        myWaiter.sendMessage(msg.getSender(), ACLMessage.INFORM, msg.getConversationId(), "proceed");
+        myWaiter.sendMessage(msg.getSender(), ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                msg.getConversationId(), "proceed");
         myWaiter.printMessage("Go ahead, what can I get you?");
         step = 1;
     }
