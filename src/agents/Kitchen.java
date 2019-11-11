@@ -10,8 +10,8 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import utils.Pair;
 
-public class Kitchen extends Agent 
-{
+public class Kitchen extends Agent {
+    
     private static final long serialVersionUID = 1L;
     private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
     private String[] dishes;

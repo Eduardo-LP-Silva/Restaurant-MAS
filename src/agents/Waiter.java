@@ -11,8 +11,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.lang.acl.ACLMessage;
 import utils.Dish;
 
-public class Waiter extends Agent 
-{
+public class Waiter extends Agent {
+    
     private static final long serialVersionUID = 7110642579660810600L;
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;

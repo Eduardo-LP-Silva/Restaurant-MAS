@@ -8,6 +8,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 public class ServeMeal extends WakerBehaviour {
+    
+    private static final long serialVersionUID = -1854723296124682854L;
     private AID customer;
     private Waiter myWaiter;
     private String dish;

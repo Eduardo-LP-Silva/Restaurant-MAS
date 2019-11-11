@@ -7,8 +7,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Dish;
 
-public class TakeOrder extends CyclicBehaviour
-{
+public class TakeOrder extends CyclicBehaviour{
+    
     private static final long serialVersionUID = 7818256748738825651L;
     private int step = 0;
     private int customerMood;
