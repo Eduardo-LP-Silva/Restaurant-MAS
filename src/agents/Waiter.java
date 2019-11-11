@@ -105,6 +105,13 @@ public class Waiter extends Agent
         }    
     }
 
+    public Dish suggestOtherDish(Dish originalDish, int customerMood) {
+
+
+
+        return null;
+    }
+
     public void addCustomer() {
         noCustomers++;
     }
