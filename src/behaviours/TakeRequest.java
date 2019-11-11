@@ -7,11 +7,16 @@ import jade.lang.acl.ACLMessage;
 public class TakeRequest extends CyclicBehaviour{
     
     private static final long serialVersionUID = 3055341223034464997L;
+    private Kitchen myKitchen;
+
+
+    public TakeRequest(Kitchen kitchen) {
+        myKitchen = kitchen;
+    }
 
     @Override
     public void action() {
-        Kitchen myKitchen = (Kitchen) myAgent;
-        ACLMessage request = myAgent.receive();
+        ACLMessage request = myKitchen.receive();
 
         if(request != null) {
             ACLMessage reply = request.createReply();

@@ -148,7 +148,7 @@ public class TakeOrder extends CyclicBehaviour{
         String infoSrc;
             
         if(myWaiter.getKnownDishes().contains(dish)) 
-            myWaiter.updateKnowDish(dish);
+            myWaiter.updateKnownDish(dish);
         else
             myWaiter.getKnownDishes().add(dish);
 
