@@ -62,6 +62,10 @@ public class Kitchen extends RestaurantAgent
         this.addBehaviour(new TakeRequest(this));
     }
 
+    public static String[] getMenu() {
+        return dishes;
+    }
+
     private void generateMeals() {
         Random rand = new Random();
         Integer cookingTime, wellPreparedProb, availability;
@@ -74,15 +78,15 @@ public class Kitchen extends RestaurantAgent
         }
     }
 
-    public Boolean checkMeal(String dish) {
+    private Boolean checkMeal(String dish) {
         return meals.containsKey(dish);
     }
 
-    public int[] getMealInfo(String dish) {
+    private int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
 
-    public String selectRandomMeal() {
+    private String selectRandomMeal() {
         Random rand = new Random();
 
         return dishes[rand.nextInt(dishes.length)];
