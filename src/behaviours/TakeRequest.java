@@ -5,7 +5,7 @@ import jade.core.behaviours.CyclicBehaviour;
 import jade.lang.acl.ACLMessage;
 
 public class TakeRequest extends CyclicBehaviour{
-    
+
     private static final long serialVersionUID = 3055341223034464997L;
     private Kitchen myKitchen;
 
@@ -32,7 +32,7 @@ public class TakeRequest extends CyclicBehaviour{
                         reply.setContent(mealString);
                     } else {
                         reply.setContent("not-found");
-                    } 
+                    }
                     myKitchen.send(reply);
                     break;
 
