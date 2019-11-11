@@ -51,7 +51,7 @@ public class Kitchen extends RestaurantAgent
             "francesinha",
             "lamb",
             "vegan burger",
-            "omelette"
+            "omelet"
         };
 
         this.generateMeals();
@@ -67,9 +67,9 @@ public class Kitchen extends RestaurantAgent
         Integer cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
-            cookingTime = rand.nextInt(85) + 5;
+            cookingTime = rand.nextInt(9) + 1;
             wellPreparedProb = rand.nextInt(9) + 1;
-            availability = rand.nextInt(3) + 1;
+            availability = rand.nextInt(4) + 1;
             meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
     }

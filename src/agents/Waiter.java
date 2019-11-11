@@ -110,6 +110,11 @@ public class Waiter extends RestaurantAgent
 
     public Dish suggestOtherDish(Dish originalDish, int customerMood) {
 
+        for(int i = 0; i < knownDishes.size(); i++)
+            if(customerMood + knownDishes.get(i).getCookingTime() - 5 >= 3
+                    && customerMood + knownDishes.get(i).getPreparation() - 5 >= 3)
+                return knownDishes.get(i);
+
         return null;
     }
 

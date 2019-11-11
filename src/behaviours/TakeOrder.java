@@ -106,8 +106,11 @@ public class TakeOrder extends CyclicBehaviour{
     }
 
     private void getCustomerFeedback(ACLMessage msg) {
-        if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-            Dish dish =  myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent()));
+        String[] msgDetails = msg.getContent().split(" ");
+
+        if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
+                || (msgDetails.length > 1 && msgDetails[1].equals("original"))) {
+            Dish dish =  myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msgDetails[0]));
             dish.decrementAvailability();
             myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "start-dish", dish.getName());
@@ -115,25 +118,31 @@ public class TakeOrder extends CyclicBehaviour{
             step = 4;
         }
         else {
-            /* TODO Customer-side idea: Maybe add static function to kitchen to serve as menu,
-            at this point the customer picks a random dish if the one ordered isn't available, else prepare original dish*/
-
+            myWaiter.printMessage("Okay, what's it going to be then?");
             step = 1;
         }
     }
 
     private void evaluateDish(Dish dish, String infoSource) {
-        //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
+        //Customer mood += cookingTime - 5 | Customer mood += DishPreparation - 5
+        Dish suggestion;
+
         if(dish.getAvailability() == 0) {
-            //TODO Don't refuse, suggest something else
             myWaiter.sendMessage(customerID, ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", "unavailable");
             myWaiter.printMessage("I'm sorry, it seems that we're all out of " + dish.getName() + ".");
             step = 1;
         } 
         else
-            if(customerMood + dish.getCookingTime() - 15 <= 3 || customerMood + dish.getPreparation() - 5 <= 3) {
-            //TODO Suggest something else (based on known dishes ?)
+            if((customerMood + dish.getCookingTime() - 5 <= 3 || customerMood + dish.getPreparation() - 5 <= 3)
+                && (suggestion = myWaiter.suggestOtherDish(dish, customerMood)) != null) {
+
+                String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
+
+                myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                        "dish-feedback", suggestion.getName() + " " + suggestionInfoSrc);
+                myWaiter.printMessage("How about " + suggestion.getName() + "?");
+                step = 3;
             }
             else {
                 myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
@@ -141,7 +150,6 @@ public class TakeOrder extends CyclicBehaviour{
                 myWaiter.printMessage("Excellent choice!");
                 step = 3;
             }
-                
     }
 
     private void receiveDishDetails(ACLMessage msg) {
