@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import behaviours.OrderPerformer;
 import behaviours.ServiceSearch;
 import jade.core.AID;
-import jade.core.Agent;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 
@@ -76,10 +75,6 @@ public class Customer extends RestaurantAgent {
             addBehaviour(new OrderPerformer(this, msg));
             hasStartedOrder = true;
         }
-    }
-
-    public void printMessage(String message) {
-        System.out.println("(Customer " + getAID().getLocalName() + ") " + message);
     }
 
     @Override

@@ -18,6 +18,6 @@ public abstract class RestaurantAgent extends Agent {
     }
 
     public void printMessage(String message) {
-        System.out.println("( " + role + " " + getAID().getLocalName() + ") " + message);
+        System.out.println("(" + role + " " + getAID().getLocalName() + ") " + message);
     }
 }
