@@ -15,7 +15,7 @@ public class OrderPerformer extends SimpleAchieveREInitiator {
 
     @Override
     protected void handleAgree(ACLMessage agree) {
-        customer.printMessage("Waiting for my dish.");
+        customer.printMessage("Received agree");
     }
 
 }

@@ -16,8 +16,8 @@ public class Waiter extends Agent
     private static final long serialVersionUID = 7110642579660810600L;
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
-    private ArrayList<String> waiters = new ArrayList<String>();
-    private ArrayList<Dish> knownDishes = new ArrayList<Dish>();
+    private ArrayList<String> waiters = new ArrayList<>();
+    private ArrayList<Dish> knownDishes = new ArrayList<>();
     private int noCustomers = 0;
     private int tips = 0;
 
@@ -74,7 +74,7 @@ public class Waiter extends Agent
         printMessage("Going home.");
     }
 
-    public void deRegister()
+    private void deRegister()
     {
         try {
             DFService.deregister(this);
@@ -105,8 +105,19 @@ public class Waiter extends Agent
         }    
     }
 
+    public Dish suggestOtherDish(Dish originalDish, int customerMood) {
+
+
+
+        return null;
+    }
+
     public void addCustomer() {
         noCustomers++;
+    }
+
+    public void addTip(int tip) {
+        tips += tip;
     }
 
     public void removeCustomer() {
@@ -150,6 +161,10 @@ public class Waiter extends Agent
 
     public ArrayList<Dish> getKnownDishes() {
         return knownDishes;
+    }
+
+    public int getTips() {
+        return tips;
     }
 
     public int getKnownDishIndex(String dishName) {

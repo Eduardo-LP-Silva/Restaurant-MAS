@@ -12,7 +12,6 @@ public class TakeOrder extends CyclicBehaviour
 {
     private static final long serialVersionUID = 7818256748738825651L;
     private int step = 0;
-    private MessageTemplate template;
     private int customerMood;
     private AID customerID;
     private Waiter myWaiter;
@@ -24,6 +23,7 @@ public class TakeOrder extends CyclicBehaviour
     @Override
     public void action() {
         ACLMessage msg;
+        MessageTemplate template;
 
         switch(step) {
             //Attend customer
@@ -63,8 +63,8 @@ public class TakeOrder extends CyclicBehaviour
 
                 break;
 
-            //Get feedback from customer
             case 3:
+                //Get feedback from customer
                 template = MessageTemplate.MatchConversationId("dish-feedback");
                 msg = myWaiter.receive(template);
 
@@ -75,19 +75,16 @@ public class TakeOrder extends CyclicBehaviour
 
                 break;
 
-            //Get feedback from kitchen
             case 4:
+                //Get feedback from kitchen
                 template = MessageTemplate.MatchConversationId("start-dish");
                 msg = myWaiter.receive(template);
 
-                if(msg != null) //Message: <dish quantity>
+                if(msg != null) //Message: <dish quantity time>
                     getKitchenFinalCheck(msg);
                 else
                     block();
                 break;
-
-            default:
-                return;
         }
     }
 
@@ -103,7 +100,7 @@ public class TakeOrder extends CyclicBehaviour
         else {
             myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(dishInfo[0])).setAvailability(Integer.parseInt(dishInfo[1]));
             myWaiter.printMessage("Your meal is being prepared.");
-            //TODO Create new timed behaviour to deliver meal
+            myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]), customerID, dishInfo[0]));
         }
     }
 
@@ -112,17 +109,21 @@ public class TakeOrder extends CyclicBehaviour
             Dish dish =  myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent()));
             dish.decrementAvailability();
             myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, "start-dish", dish.getName());
+            myWaiter.printMessage("Right away!");
             step = 4;
         }
         else {
-            //TODO Customer-side idea: Maybe add static function to kitchen to serve as menu, at this point the customer picks a random dish?
+            /* TODO Customer-side idea: Maybe add static function to kitchen to serve as menu,
+            at this point the customer picks a random dish if the one ordered isn't available, else prepare original dish*/
+
             step = 1;
         }
     }
 
-    private void evaluateDish(Dish dish, boolean fastCheck) {
+    private void evaluateDish(Dish dish, String infoSource) {
         //Customer mood += cookingTime - 15 | Customer mood += DishPreparation - 5
         if(dish.getAvailability() == 0) {
+            //TODO Don't refuse, suggest something else
             myWaiter.sendMessage(customerID, ACLMessage.REFUSE, "order-request", "unavailable");
             myWaiter.printMessage("I'm sorry, it seems that we're all out of " + dish.getName() + ".");
             step = 1;
@@ -132,7 +133,7 @@ public class TakeOrder extends CyclicBehaviour
             //TODO Suggest something else (based on known dishes ?)
             }
             else {
-                myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, "dish-feedback", dish.getName() + " " + "kitchen");
+                myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, "dish-feedback", dish.getName() + " " + infoSource);
                 myWaiter.printMessage("Excellent choice!");
                 step = 3;
             }
@@ -141,17 +142,23 @@ public class TakeOrder extends CyclicBehaviour
 
     private void receiveDishDetails(ACLMessage msg) {
         String content = msg.getContent();
-        String[] dishDetails = content.split(" "); //Message format: "dish availability cookigTime preparationRate"
+        String[] dishDetails = content.split(" "); //Message format: "dish availability cookingTime preparationRate"
         boolean reliable = msg.getSender().getName().equals(myWaiter.getKitchen().getName());
         Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
             Integer.parseInt(dishDetails[3]), reliable);
+        String infoSrc;
             
         if(myWaiter.getKnownDishes().contains(dish)) 
             myWaiter.updateKnowDish(dish);
         else
             myWaiter.getKnownDishes().add(dish);
 
-        evaluateDish(dish, reliable);
+        if(reliable)
+            infoSrc = "kitchen";
+        else
+            infoSrc = "waiter";
+
+        evaluateDish(dish, infoSrc);
     }
 
     private void getOrder(ACLMessage msg) {
@@ -162,21 +169,19 @@ public class TakeOrder extends CyclicBehaviour
         customerMood = Integer.parseInt(customerDetails[1]);
 
         if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
-            customerMood--;
-
             if(customerMood <= 5) {
                 //TODO Ask waiter
             }
             else {
+                customerMood--;
                 myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, "dish-details", dish);
                 myWaiter.printMessage("Hold on a minute, let me check with the kitchen staff.");
             }
 
-
             step = 2;
         }
         else
-            evaluateDish(myWaiter.getKnownDishes().get(index), true);
+            evaluateDish(myWaiter.getKnownDishes().get(index), "kitchen");
     }
 
     private void attendCustomer(ACLMessage msg) {
@@ -190,6 +195,8 @@ public class TakeOrder extends CyclicBehaviour
         customerID = msg.getSender();
         myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, msg.getConversationId(), "ok", FIPANames.InteractionProtocol.FIPA_REQUEST);
         myWaiter.printMessage("I'll gladly be your waiter this evening, " + msg.getSender().getLocalName() + ".");
+        myWaiter.sendMessage(msg.getSender(), ACLMessage.INFORM, msg.getConversationId(), "proceed");
+        myWaiter.printMessage("Go ahead, what can I get you?");
         step = 1;
     }
 }
