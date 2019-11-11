@@ -10,13 +10,15 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
-public class Kitchen extends Agent {
-    
+public class Kitchen extends RestaurantAgent
+{
     private static final long serialVersionUID = 1L;
     private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
     private String[] dishes;
 
     protected void setup() {
+        role = "Kitchen";
+
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 

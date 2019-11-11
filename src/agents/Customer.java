@@ -7,8 +7,7 @@ import behaviours.ServiceSearch;
 import jade.core.AID;
 import jade.core.Agent;
 
-public class Customer extends Agent {
-    
+public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private AID[] waiters = null;
@@ -17,6 +16,8 @@ public class Customer extends Agent {
 
     @Override
     protected void setup() {
+        role = "Customer";
+
         Object[] args = getArguments();
         
         printMessage("Hello! Customer " + getAID().getLocalName() + " is ready.");

@@ -4,6 +4,7 @@ import agents.Waiter;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.WakerBehaviour;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
@@ -27,7 +28,8 @@ public class ServeMeal extends WakerBehaviour {
     public void onWake() {
         switch(step) {
             case 0:
-                myWaiter.sendMessage(customer, ACLMessage.REQUEST, "meal-delivering", dish);
+                myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                        "meal-delivering", dish);
                 myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
                 step = 1;
                 getCustomerFeedback();
