@@ -13,7 +13,7 @@ public class Kitchen extends RestaurantAgent
 {
     private static final long serialVersionUID = 1L;
     private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
-    private String[] dishes;
+    private static String[] dishes;
 
     protected void setup() {
         role = "Kitchen";
@@ -78,11 +78,11 @@ public class Kitchen extends RestaurantAgent
         }
     }
 
-    private Boolean checkMeal(String dish) {
+    public Boolean checkMeal(String dish) {
         return meals.containsKey(dish);
     }
 
-    private int[] getMealInfo(String dish) {
+    public int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
 
