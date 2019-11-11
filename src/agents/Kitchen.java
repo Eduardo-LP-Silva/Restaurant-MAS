@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import behaviours.TakeRequest;
-import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;

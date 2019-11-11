@@ -24,27 +24,16 @@ public class TakeRequest extends CyclicBehaviour{
             String meal = request.getContent();
             String mealString = "";
 
-            switch(convId) {
-                case "dish-details":
-                    if(myKitchen.checkMeal(meal)) {
-                        int[] mealInfo = myKitchen.getMealInfo(meal);
-                        mealString = mealInfo[0] + " " + mealInfo[1] + " " + mealInfo[2];
-                        reply.setContent(mealString);
-                    } else {
-                        reply.setContent("not-found");
-                    }
-                    myKitchen.send(reply);
-                    break;
-
-                case "start-dish":
-
-                    break;
+            if(myKitchen.checkMeal(meal)) {
+                int[] mealInfo = myKitchen.getMealInfo(meal);
+                mealString = meal + " " + mealInfo[0] + " " + mealInfo[1];
+                if(convId.equals("dish-details"))
+                    mealString += " " + mealInfo[2];
+                reply.setContent(mealString);
+            } else {
+                reply.setContent("not-found");
             }
-
-            //TODO: Check if meal exists (if not, deny)
-            //TODO: Get information about meal (time + quality)
-            //TODO: Build reply with meal info
-            //TODO: Send reply
+            myKitchen.send(reply);
         }
         else
             block();
