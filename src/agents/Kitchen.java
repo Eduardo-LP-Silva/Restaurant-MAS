@@ -73,6 +73,10 @@ public class Kitchen extends Agent {
         }
     }
 
+    public Boolean checkMeal(String dish) {
+        return meals.containsKey(dish);
+    }
+
     public int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
