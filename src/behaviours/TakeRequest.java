@@ -32,7 +32,8 @@ public class TakeRequest extends CyclicBehaviour{
                         reply.setContent(mealString);
                     } else {
                         reply.setContent("not-found");
-                    }      
+                    } 
+                    myKitchen.send(reply);     
                     break;
 
                 case "start-dish":
