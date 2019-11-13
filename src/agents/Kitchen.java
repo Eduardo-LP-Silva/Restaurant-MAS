@@ -3,20 +3,21 @@ package agents;
 import java.util.HashMap;
 import java.util.Random;
 
-import jade.core.Agent;
+import behaviours.TakeRequest;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
-import utils.Pair;
 
-public class Kitchen extends Agent 
+public class Kitchen extends RestaurantAgent
 {
     private static final long serialVersionUID = 1L;
-    private HashMap<String, Pair<Integer, Integer>> meals; //<Dish, <CookingTime, WellPreparedProbability>>
-    private String[] dishes;
+    private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
+    private static String[] dishes;
 
     protected void setup() {
+        role = "Kitchen";
+
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
 
@@ -32,7 +33,7 @@ public class Kitchen extends Agent
             e.printStackTrace();
         }
 
-        meals = new HashMap<String, Pair<Integer, Integer>>();
+        meals = new HashMap<String, int[]>();
         dishes = new String[] {
             "onion soup",
             "escargots",
@@ -50,32 +51,42 @@ public class Kitchen extends Agent
             "francesinha",
             "lamb",
             "vegan burger",
-            "omelette"
+            "omelet"
         };
 
         this.generateMeals();
         
-        System.out.println("Kitchen " + this.getAID().getLocalName() + " at your service.");
+        System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " at your service.");
         
-        //Wait for client requests
+        //Wait for Waiter requests
+        this.addBehaviour(new TakeRequest(this));
+    }
+
+    public static String[] getMenu() {
+        return dishes;
     }
 
     private void generateMeals() {
         Random rand = new Random();
-        Integer cookingTime, wellPreparedProb;
+        Integer cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
-            cookingTime = rand.nextInt(85) + 5;
+            cookingTime = rand.nextInt(9) + 1;
             wellPreparedProb = rand.nextInt(9) + 1;
-            meals.put(dishes[i], new Pair<Integer,Integer>(cookingTime, wellPreparedProb));
+            availability = rand.nextInt(4) + 1;
+            meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
     }
 
-    public Pair<Integer, Integer> getMealInfo(String dish) {
+    public Boolean checkMeal(String dish) {
+        return meals.containsKey(dish);
+    }
+
+    public int[] getMealInfo(String dish) {
         return meals.get(dish);
     }
 
-    public String selectRandomMeal() {
+    private String selectRandomMeal() {
         Random rand = new Random();
 
         return dishes[rand.nextInt(dishes.length)];
@@ -89,6 +100,6 @@ public class Kitchen extends Agent
             e.printStackTrace();
         }
 
-        System.out.println("Kitchen " + this.getAID().getLocalName() + " shutting down.");
+        System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " shutting down.");
     }
 }

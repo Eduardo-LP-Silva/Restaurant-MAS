@@ -1,28 +1,25 @@
 package behaviours;
 
 import agents.Customer;
-import jade.core.AID;
-import jade.core.behaviours.BaseInitiator;
 import jade.lang.acl.ACLMessage;
+import jade.proto.SimpleAchieveREInitiator;
 
-public class OrderPerformer extends BaseInitiator {
+public class OrderPerformer extends SimpleAchieveREInitiator {
     private static final long serialVersionUID = 2897989135282380056L;
     private Customer customer;
-    private AID currentWaiter;
 
-    OrderPerformer(Customer c) {
+    public OrderPerformer(Customer c, ACLMessage msg) {
+        super(c, msg);
         customer = c;
-        currentWaiter = customer.getFirstWaiter();
     }
 
     @Override
-    protected ACLMessage createInitiation() {
-        ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-        msg.addReceiver(currentWaiter);
-        msg.setLanguage("English");
-        msg.setConversationId("order-request");
-        msg.setContent(customer.getDesiredDish());
-        customer.send(msg);
-        return msg;
+    protected void handleAgree(ACLMessage msg) {
+        customer.printMessage("Received message: " + msg.getContent());
+    }
+
+    @Override
+    protected void handleInform(ACLMessage msg) {
+        customer.printMessage("Received message: " + msg.getContent());
     }
 }
