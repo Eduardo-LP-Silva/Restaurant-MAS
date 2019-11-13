@@ -1,6 +1,7 @@
 package agents;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -39,13 +40,14 @@ public class Customer extends RestaurantAgent {
             printMessage("No dish specified!");
             doDelete();
         }
-
+        
         addBehaviour(new ServiceSearch(this, 1000));
     }
 
     @Override
     public void addWaiters(AID[] newWaiters) {
-        this.setWaiters(waiters);
+        this.setWaiters(new ArrayList<AID>(Arrays.asList(newWaiters)));
+
         if(!this.hasWaiter()) {
             this.getAvailableWaiter();
         }

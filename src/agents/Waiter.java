@@ -3,6 +3,7 @@ package agents;
 import java.util.ArrayList;
 import java.util.Random;
 
+import behaviours.ReplyToWaiter;
 import behaviours.ServiceSearch;
 import behaviours.TakeOrder;
 import jade.core.AID;
@@ -57,8 +58,9 @@ public class Waiter extends RestaurantAgent
         if(!searchForKitchen())
             this.doDelete();
 
-        this.addBehaviour(new ServiceSearch(this, 1000));
         this.addBehaviour(new TakeOrder(this));
+        this.addBehaviour(new ServiceSearch(this, 1000));
+        this.addBehaviour(new ReplyToWaiter(this));
     }
 
     private boolean searchForKitchen() {
