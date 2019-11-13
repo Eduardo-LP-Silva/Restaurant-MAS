@@ -10,6 +10,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import utils.Dish;
 
@@ -131,6 +132,33 @@ public class Waiter extends RestaurantAgent
     }
 
     public void informAboutDish(AID otherWaiter, String dishName) {
+        int dishIndex = getKnownDishIndex(dishName);
+
+        if(dishIndex == -1)
+            sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    "dish-details", "not-found");
+        else {
+            Dish requestedDish = knownDishes.get(dishIndex);
+            Random rand = new Random();
+            String dishDetails = dishName + " ";
+
+            //75% chance of lying
+            if(!trusthworthy && rand.nextInt(99) + 1 <= 75) {
+                if(requestedDish.getAvailability() == 0)
+                    dishDetails += rand.nextInt(4) + 1; //To make the other waiter look bad when he finds out it's 0
+                else
+                    dishDetails += rand.nextInt(requestedDish.getAvailability());
+
+                dishDetails += " " + rand.nextInt(requestedDish.getCookingTime() * 2) + " "
+                        + rand.nextInt(requestedDish.getPreparation());
+            }
+            else
+                dishDetails += requestedDish.getAvailability() + " " + requestedDish.getCookingTime() + " "
+                        + requestedDish.getPreparation();
+
+            sendMessage(otherWaiter, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    "dish-details", dishDetails);
+        }
 
     }
 
