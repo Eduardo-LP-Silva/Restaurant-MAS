@@ -11,9 +11,9 @@ public abstract class RestaurantAgent extends Agent {
     protected ArrayList<AID> waiters = new ArrayList<>();
 
     public void addWaiters(AID[] newWaiters) {
-        for(int i = 0; i < newWaiters.length; i++)
-            if(!waiters.contains(newWaiters[i]))
-                waiters.add(newWaiters[i]);
+        for(AID newWaiter : newWaiters)
+            if (!waiters.contains(newWaiter))
+                waiters.add(newWaiter);
     }
 
     public void sendMessage(AID aid, int performative, String protocol , String conversationID, String content) {

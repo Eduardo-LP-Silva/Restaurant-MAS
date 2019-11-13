@@ -1,12 +1,16 @@
 package agents;
 
 import java.util.ArrayList;
+import java.util.Random;
+
+import behaviours.ServiceSearch;
 import behaviours.TakeOrder;
 import jade.core.AID;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
+import jade.lang.acl.ACLMessage;
 import utils.Dish;
 
 public class Waiter extends RestaurantAgent
@@ -18,9 +22,19 @@ public class Waiter extends RestaurantAgent
     private int noCustomers = 0;
     private int tips = 0;
     private boolean trusthworthy;
+    private int waiterIndex = 0;
 
     protected void setup() {
         role = "Waiter";
+
+        Object[] args = getArguments();
+
+        if(args.length != 1) {
+            System.out.println("Usage: Waiter <trustworthy>");
+            return;
+        }
+
+        trusthworthy = Boolean.parseBoolean((String) args[0]);
 
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
@@ -42,6 +56,7 @@ public class Waiter extends RestaurantAgent
         if(!searchForKitchen())
             this.doDelete();
 
+        this.addBehaviour(new ServiceSearch(this, 1000));
         this.addBehaviour(new TakeOrder(this));
     }
 
@@ -115,6 +130,21 @@ public class Waiter extends RestaurantAgent
         return null;
     }
 
+    public void informAboutDish(AID otherWaiter, String dishName) {
+
+    }
+
+    public AID getNextWaiter() {
+        AID currentWaiter = waiters.get(waiterIndex);
+
+        if(waiterIndex < waiters.size() - 1)
+            waiterIndex++;
+        else
+            waiterIndex = 0;
+
+        return currentWaiter;
+    }
+
     public void addCustomer() {
         noCustomers++;
     }
@@ -133,6 +163,10 @@ public class Waiter extends RestaurantAgent
 
     public AID getKitchen() {
         return kitchen;
+    }
+
+    public int getWaiterIndex() {
+        return waiterIndex;
     }
 
     public ArrayList<AID> getWaiters() {
