@@ -189,7 +189,7 @@ public class TakeOrder extends CyclicBehaviour{
         customerMood = Integer.parseInt(customerDetails[1]);
 
         if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
-            if(customerMood <= 5) {
+            if(customerMood <= 5 && myWaiter.getWaiters().size() > 0) {
                 //TODO Ask waiter
             }
             else {

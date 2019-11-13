@@ -14,10 +14,10 @@ public class Waiter extends RestaurantAgent
     private static final long serialVersionUID = 7110642579660810600L;
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
-    private ArrayList<String> waiters = new ArrayList<>();
     private ArrayList<Dish> knownDishes = new ArrayList<>();
     private int noCustomers = 0;
     private int tips = 0;
+    private boolean trusthworthy;
 
     protected void setup() {
         role = "Waiter";
@@ -133,6 +133,10 @@ public class Waiter extends RestaurantAgent
 
     public AID getKitchen() {
         return kitchen;
+    }
+
+    public ArrayList<AID> getWaiters() {
+        return waiters;
     }
 
     public ArrayList<Dish> getKnownDishes() {

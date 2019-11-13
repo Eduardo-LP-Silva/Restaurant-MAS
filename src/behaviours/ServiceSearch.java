@@ -1,6 +1,7 @@
 package behaviours;
 
 import agents.Customer;
+import agents.RestaurantAgent;
 import jade.core.AID;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
@@ -11,11 +12,12 @@ import jade.domain.FIPAException;
 public class ServiceSearch extends TickerBehaviour {
     
     private static final long serialVersionUID = -4766123904483710759L;
-    private Customer customer;
+    private RestaurantAgent myRestaurantAgent;
 
-    public ServiceSearch(Customer a, long period) {
+    public ServiceSearch(RestaurantAgent a, long period) {
         super(a, period);
-        this.customer = a;
+
+        myRestaurantAgent = a;
     }
 
     @Override
@@ -33,12 +35,8 @@ public class ServiceSearch extends TickerBehaviour {
             }
 
             // found at least one waiter
-            if(result.length > 0) {
-                customer.setWaiters(waiters);
-                if(!customer.hasWaiter()) {
-                    customer.getAvailableWaiter();
-                }
-            }
+            if(result.length > 0)
+                myRestaurantAgent.addWaiters(waiters);
 
         } catch (FIPAException fe) {
             fe.printStackTrace();
