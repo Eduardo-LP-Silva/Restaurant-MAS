@@ -1,5 +1,7 @@
 package agents;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -13,7 +15,6 @@ import jade.proto.SimpleAchieveREInitiator;
 public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
-    private AID[] waiters = null;
     private HashSet<AID> unavailableWaiters = new HashSet<>();
     private boolean hasWaiter = false;
     private int mood;
@@ -39,11 +40,20 @@ public class Customer extends RestaurantAgent {
             printMessage("No dish specified!");
             doDelete();
         }
-
+        
         addBehaviour(new ServiceSearch(this, 1000));
     }
 
-    public void setWaiters(AID[] agents) {
+    @Override
+    public void addWaiters(AID[] newWaiters) {
+        this.setWaiters(new ArrayList<AID>(Arrays.asList(newWaiters)));
+
+        if(!this.hasWaiter()) {
+            this.getAvailableWaiter();
+        }
+    }
+
+    public void setWaiters(ArrayList<AID> agents) {
         waiters = agents;
     }
 
@@ -52,9 +62,9 @@ public class Customer extends RestaurantAgent {
     }
 
     public AID getCurrentWaiter() {
-        for(int i=0; i<waiters.length; i++) {
-            if(!unavailableWaiters.contains(waiters[i])) {
-                return waiters[i];
+        for(int i=0; i<waiters.size(); i++) {
+            if(!unavailableWaiters.contains(waiters.get(i))) {
+                return waiters.get(i);
             }
         }
         return null;

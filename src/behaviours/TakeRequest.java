@@ -24,14 +24,20 @@ public class TakeRequest extends CyclicBehaviour{
             String meal = request.getContent();
             String mealString = "";
 
+            reply.setPerformative(ACLMessage.AGREE);
+            reply.setContent("ok");
+            myKitchen.send(reply);
+
             if(myKitchen.checkMeal(meal)) {
                 int[] mealInfo = myKitchen.getMealInfo(meal);
                 mealString = meal + " " + mealInfo[0] + " " + mealInfo[1];
                 if(convId.equals("dish-details"))
                     mealString += " " + mealInfo[2];
                 reply.setContent(mealString);
+                reply.setPerformative(ACLMessage.INFORM);
             } else {
-                reply.setContent("not-found");
+                reply.setContent(meal);
+                reply.setPerformative(ACLMessage.FAILURE);
             }
             myKitchen.send(reply);
         }

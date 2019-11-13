@@ -85,6 +85,18 @@ public class TakeOrder extends CyclicBehaviour{
                 else
                     block();
                 break;
+
+            case 5:
+                template = MessageTemplate.or(MessageTemplate.MatchConversationId("dish-details"),
+                        MessageTemplate.MatchConversationId("start-dish"));
+
+                msg = myWaiter.receive(template);
+
+                if(msg != null)
+                    receiveInfoAck(msg);
+                else
+                    block();
+                break;
         }
     }
 
@@ -152,14 +164,35 @@ public class TakeOrder extends CyclicBehaviour{
             }
     }
 
+    private void receiveInfoAck(ACLMessage msg) {
+        if(msg.getPerformative() == ACLMessage.AGREE) {
+            if(step == 1)
+                step = 2;
+            else
+                step = 4;
+        }
+        else
+            System.out.println("Something went wrong. This wasn't supposed to happen.");
+    }
+
     private void receiveDishDetails(ACLMessage msg) {
         String content = msg.getContent();
 
-        if(content.equals("not-found")) {
-            myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                    msg.getConversationId(), "not-found");
-            step = 1;
-            return;
+        if(msg.getPerformative() == ACLMessage.FAILURE) {
+            if(msg.getSender().equals(myWaiter.getKitchen()) ||
+                    (!msg.getSender().equals(myWaiter.getKitchen())
+                            && myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1)) {
+                myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                        msg.getConversationId(), "not-found");
+                step = 1;
+                return;
+            }
+            else {
+                myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                        FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
+
+                step = 5;
+            }
         }
 
         String[] dishDetails = content.split(" "); //Message format: "dish availability cookingTime preparationRate"
@@ -189,8 +222,10 @@ public class TakeOrder extends CyclicBehaviour{
         customerMood = Integer.parseInt(customerDetails[1]);
 
         if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
-            if(customerMood <= 5) {
-                //TODO Ask waiter
+            if(customerMood <= 5 && myWaiter.getWaiters().size() > 0) {
+                myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                        FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", dish);
+                myWaiter.printMessage("Hold on a minute, let me ask my colleague.");
             }
             else {
                 customerMood--;
@@ -199,7 +234,7 @@ public class TakeOrder extends CyclicBehaviour{
                 myWaiter.printMessage("Hold on a minute, let me check with the kitchen staff.");
             }
 
-            step = 2;
+            step = 5;
         }
         else
             evaluateDish(myWaiter.getKnownDishes().get(index), "kitchen");
