@@ -16,6 +16,7 @@ public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private HashSet<AID> unavailableWaiters = new HashSet<>();
+    private ArrayList<AID> waiters = new ArrayList<>();
     private boolean hasWaiter = false;
     private int mood;
 

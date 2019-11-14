@@ -33,7 +33,7 @@ public class ReplyToWaiter extends CyclicBehaviour {
         if(msg != null) {
             ACLMessage reply = msg.createReply();
             myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
-                    msg.getConversationId(), "");
+                    msg.getConversationId(), msg.getContent());
             myWaiter.informAboutDish(msg.getSender(), msg.getContent());
         }
         else

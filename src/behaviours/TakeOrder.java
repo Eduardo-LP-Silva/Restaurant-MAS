@@ -171,24 +171,39 @@ public class TakeOrder extends CyclicBehaviour{
             else
                 step = 4;
         }
-        else
-            System.out.println("Something went wrong. This wasn't supposed to happen.");
+        else {
+            if(!msg.getSender().equals(myWaiter.getKitchen())) {
+                AID nextAgent = myWaiter.getNextReliableWaiter();
+
+                if(nextAgent == null)
+                    nextAgent = myWaiter.getKitchen();
+
+                myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
+                        FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
+
+                step = 5;
+            }
+
+        }
     }
 
     private void receiveDishDetails(ACLMessage msg) {
         String content = msg.getContent();
 
         if(msg.getPerformative() == ACLMessage.FAILURE) {
-            if(msg.getSender().equals(myWaiter.getKitchen()) ||
-                    (!msg.getSender().equals(myWaiter.getKitchen())
-                            && myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1)) {
+            if(msg.getSender().equals(myWaiter.getKitchen())) {
                 myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                         msg.getConversationId(), "not-found");
                 step = 1;
                 return;
             }
             else {
-                myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                AID nextAgent = myWaiter.getNextReliableWaiter();
+
+                if(nextAgent == null)
+                    nextAgent = myWaiter.getKitchen();
+
+                myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
                         FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
 
                 step = 5;
@@ -219,11 +234,12 @@ public class TakeOrder extends CyclicBehaviour{
         String dish = customerDetails[0];
         int index;
 
+        myWaiter.resetWaiterIndex();
         customerMood = Integer.parseInt(customerDetails[1]);
 
         if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
             if(customerMood <= 5 && myWaiter.getWaiters().size() > 0) {
-                myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                myWaiter.sendMessage(myWaiter.getNextReliableWaiter(), ACLMessage.REQUEST,
                         FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", dish);
                 myWaiter.printMessage("Hold on a minute, let me ask my colleague.");
             }

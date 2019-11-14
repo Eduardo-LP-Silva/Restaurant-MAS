@@ -14,6 +14,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import utils.Dish;
+import utils.Pair;
 
 public class Waiter extends RestaurantAgent
 {
@@ -21,6 +22,7 @@ public class Waiter extends RestaurantAgent
     private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
     private ArrayList<Dish> knownDishes = new ArrayList<>();
+    private ArrayList<Pair<AID, Boolean>> waiters = new ArrayList<>();
     private int noCustomers = 0;
     private int tips = 0;
     private boolean trusthworthy;
@@ -164,15 +166,47 @@ public class Waiter extends RestaurantAgent
 
     }
 
-    public AID getNextWaiter() {
-        AID currentWaiter = waiters.get(waiterIndex);
+    public void addWaiters(AID[] newWaiters) {
+        boolean found;
 
-        if(waiterIndex < waiters.size() - 1)
+        for(AID newWaiter : newWaiters) {
+            found = false;
+
+            for(Pair<AID, Boolean> waiter : waiters)
+                if(waiter.getKey().equals(newWaiter)) {
+                    found = true;
+                    break;
+                }
+
+            if(!found)
+                waiters.add(new Pair<>(newWaiter, true));
+        }
+    }
+
+    public void resetWaiterIndex() {
+        for(int i = 0; i < waiters.size(); i++)
+            if(waiters.get(i).getValue()) {
+                waiterIndex = i;
+                return;
+            }
+    }
+
+    public AID getNextReliableWaiter() {
+        Pair<AID, Boolean> waiter;
+
+        if(waiters.size() == 0 || waiterIndex >= waiters.size())
+            return null;
+
+        do {
+            waiter = waiters.get(waiterIndex);
             waiterIndex++;
-        else
-            waiterIndex = 0;
+        }
+        while(!waiter.getValue() && waiterIndex < waiters.size());
 
-        return currentWaiter;
+        if(!waiter.getValue())
+            return null;
+        else
+            return waiter.getKey();
     }
 
     public void addCustomer() {
@@ -199,7 +233,7 @@ public class Waiter extends RestaurantAgent
         return waiterIndex;
     }
 
-    public ArrayList<AID> getWaiters() {
+    public ArrayList<Pair<AID, Boolean>> getWaiters() {
         return waiters;
     }
 
