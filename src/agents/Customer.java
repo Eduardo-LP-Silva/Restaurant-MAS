@@ -116,22 +116,22 @@ public class Customer extends RestaurantAgent {
 
     // Step 1: Order dish (corresponds to waiter's step 1)
     public void orderDish() {
-        // decideDish();
-        // For testing purposes
-        desiredDish = "lolada";
+        decideDish();
 
-        printMessage("I would like to eat " + desiredDish + ".");
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        printMessage("I would like to eat " + desiredDish + ".");
+
         ACLMessage msg = new ACLMessage(ACLMessage.CFP);
         msg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+        msg.setLanguage("English");
         msg.addReceiver(waiter);
         msg.setConversationId("order-request");
-        msg.setContent(desiredDish + " " + mood); // Message: <Dish Mood>
+        msg.setContent(desiredDish + " - " + mood); // Message: <Dish - Mood>
 
         addBehaviour(new OrderPerformer(this, msg));
     }

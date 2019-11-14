@@ -101,7 +101,7 @@ public class TakeOrder extends CyclicBehaviour{
     }
 
     private void getKitchenFinalCheck(ACLMessage msg) {
-        String[] dishInfo = msg.getContent().split(" ");
+        String[] dishInfo = msg.getContent().split(" - ");
 
         if(msg.getPerformative() == ACLMessage.REFUSE) {
             myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent())).setAvailability(0);
@@ -184,7 +184,7 @@ public class TakeOrder extends CyclicBehaviour{
                             && myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1)) {
                 myWaiter.printMessage("I'm afraid we don't serve that dish in here. Try another one.");
                 myWaiter.sendMessage(customerID, ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                        msg.getConversationId(), "not-found");
+                        "order-request", "not-found");
                 step = 1;
                 return;
             }
@@ -196,7 +196,7 @@ public class TakeOrder extends CyclicBehaviour{
             }
         }
 
-        String[] dishDetails = content.split(" "); //Message format: "dish availability cookingTime preparationRate"
+        String[] dishDetails = content.split(" - "); //Message format: "dish - availability - cookingTime - preparationRate"
         boolean reliable = msg.getSender().getName().equals(myWaiter.getKitchen().getName());
         Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
             Integer.parseInt(dishDetails[3]), reliable);
@@ -216,7 +216,7 @@ public class TakeOrder extends CyclicBehaviour{
     }
 
     private void getOrder(ACLMessage msg) {
-        String[] customerDetails = msg.getContent().split(" "); //Message: <Dish Mood>
+        String[] customerDetails = msg.getContent().split(" - "); //Message: <Dish - Mood>
         String dish = customerDetails[0];
         int index;
 

@@ -14,14 +14,25 @@ public class OrderPerformer extends ContractNetInitiator {
     }
 
     @Override
+    protected void handleOutOfSequence(ACLMessage msg) {
+        switch(msg.getPerformative()) {
+            case ACLMessage.REFUSE:
+                handleRefuse(msg);
+                break;
+        }
+    }
+
+    @Override
     protected void handleRefuse(ACLMessage msg) {
         if (customer.getAttempts() >= 3) {
             customer.printMessage("I've tried enough, leaving now...");
             customer.doDelete();
         }
         else {
+            customer.printMessage("Okay, I'll take another look in the menu.");
             customer.incrementAttempts();
             customer.orderDish();
         }
     }
+
 }
