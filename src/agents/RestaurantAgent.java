@@ -12,7 +12,7 @@ public abstract class RestaurantAgent extends Agent {
 
     public void addWaiters(AID[] newWaiters) {
         for(AID newWaiter : newWaiters)
-            if (!waiters.contains(newWaiter))
+            if (!waiters.contains(newWaiter) && !newWaiter.equals(this.getAID()))
                 waiters.add(newWaiter);
     }
 
