@@ -2,19 +2,26 @@ package behaviours;
 
 import agents.Customer;
 import jade.lang.acl.ACLMessage;
-import jade.proto.SimpleAchieveREInitiator;
+import jade.proto.ContractNetInitiator;
 
-public class OrderPerformer extends SimpleAchieveREInitiator {
+public class OrderPerformer extends ContractNetInitiator {
     private static final long serialVersionUID = 2897989135282380056L;
     private Customer customer;
 
-    public OrderPerformer(Customer c, ACLMessage msg) {
-        super(c, msg);
+    public OrderPerformer(Customer c, ACLMessage cfp) {
+        super(c, cfp);
         customer = c;
     }
 
     @Override
     protected void handleRefuse(ACLMessage msg) {
-        customer.printMessage("Got refuse");
+        if (customer.getAttempts() >= 3) {
+            customer.printMessage("I've tried enough, leaving now...");
+            customer.doDelete();
+        }
+        else {
+            customer.incrementAttempts();
+            customer.orderDish();
+        }
     }
 }

@@ -52,6 +52,14 @@ public class Customer extends RestaurantAgent {
         return hasWaiter;
     }
 
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void incrementAttempts() {
+        attempts++;
+    }
+
     private AID getCurrentWaiter() {
         for (AID aid : waiters) {
             if (!unavailableWaiters.contains(aid)) {
@@ -107,7 +115,7 @@ public class Customer extends RestaurantAgent {
     }
 
     // Step 1: Order dish (corresponds to waiter's step 1)
-    private void orderDish() {
+    public void orderDish() {
         // decideDish();
         // For testing purposes
         desiredDish = "lolada";
@@ -132,4 +140,5 @@ public class Customer extends RestaurantAgent {
     protected void takeDown() {
         printMessage("Going home");
     }
+
 }
