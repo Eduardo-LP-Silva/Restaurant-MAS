@@ -24,6 +24,7 @@ public class TakeRequest extends CyclicBehaviour{
             String meal = request.getContent();
             String mealString = "";
 
+            reply.setConversationId(request.getConversationId());
             reply.setPerformative(ACLMessage.AGREE);
             reply.setContent("ok");
             myKitchen.send(reply);

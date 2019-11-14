@@ -166,7 +166,7 @@ public class TakeOrder extends CyclicBehaviour{
 
     private void receiveInfoAck(ACLMessage msg) {
         if(msg.getPerformative() == ACLMessage.AGREE) {
-            if(step == 1)
+            if(msg.getConversationId().equals("dish-details"))
                 step = 2;
             else
                 step = 4;
@@ -182,7 +182,8 @@ public class TakeOrder extends CyclicBehaviour{
             if(msg.getSender().equals(myWaiter.getKitchen()) ||
                     (!msg.getSender().equals(myWaiter.getKitchen())
                             && myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1)) {
-                myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
+                myWaiter.printMessage("I'm afraid we don't serve that dish in here. Try another one.");
+                myWaiter.sendMessage(customerID, ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                         msg.getConversationId(), "not-found");
                 step = 1;
                 return;
@@ -222,6 +223,8 @@ public class TakeOrder extends CyclicBehaviour{
         customerMood = Integer.parseInt(customerDetails[1]);
 
         if((index = myWaiter.getKnownDishIndex(customerDetails[0])) == -1) {
+            step = 5;
+
             if(customerMood <= 5 && myWaiter.getWaiters().size() > 0) {
                 myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
                         FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", dish);
@@ -233,8 +236,6 @@ public class TakeOrder extends CyclicBehaviour{
                         "dish-details", dish);
                 myWaiter.printMessage("Hold on a minute, let me check with the kitchen staff.");
             }
-
-            step = 5;
         }
         else
             evaluateDish(myWaiter.getKnownDishes().get(index), "kitchen");
