@@ -32,7 +32,7 @@ public class Customer extends RestaurantAgent {
         attempts = 0;
         desiredDish = null;
         
-        addBehaviour(new ServiceSearch(this, 1000));
+        addBehaviour(new ServiceSearch(this, 10000));
     }
 
     @Override
