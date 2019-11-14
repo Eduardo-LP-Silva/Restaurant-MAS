@@ -33,6 +33,7 @@ public class Waiter extends RestaurantAgent
 
         if(args.length != 1) {
             System.out.println("Usage: Waiter <trustworthy>");
+            doDelete();
             return;
         }
 

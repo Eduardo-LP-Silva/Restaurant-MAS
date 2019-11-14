@@ -1,9 +1,7 @@
 package agents;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import behaviours.OrderPerformer;
 import behaviours.ServiceSearch;
@@ -16,61 +14,55 @@ public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
     private HashSet<AID> unavailableWaiters = new HashSet<>();
-    private boolean hasWaiter = false;
+    private boolean hasWaiter;
+    private AID waiter;
     private int mood;
+    private int attempts;
 
     @Override
     protected void setup() {
         role = "Customer";
-
-        Object[] args = getArguments();
         
         printMessage("Hello! Customer " + getAID().getLocalName() + " is ready.");
 
-        if (args != null && args.length == 1) {
-            desiredDish = (String) args[0];
-            // standardizing dish name
-            desiredDish =  desiredDish.replace("-", " ");
-            desiredDish = desiredDish.toLowerCase();
-            printMessage("I want to eat " + desiredDish + "!");
+        Random random = new Random();
+        mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
 
-            Random random = new Random();
-            mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
-        } else {
-            printMessage("No dish specified!");
-            doDelete();
-        }
+        hasWaiter = false;
+        attempts = 0;
+        desiredDish = null;
         
         addBehaviour(new ServiceSearch(this, 1000));
     }
 
     @Override
     public void addWaiters(AID[] newWaiters) {
-        this.setWaiters(new ArrayList<AID>(Arrays.asList(newWaiters)));
+        this.setWaiters(new ArrayList<>(Arrays.asList(newWaiters)));
 
         if(!this.hasWaiter()) {
             this.getAvailableWaiter();
         }
     }
 
-    public void setWaiters(ArrayList<AID> agents) {
+    private void setWaiters(ArrayList<AID> agents) {
         waiters = agents;
     }
 
-    public boolean hasWaiter() {
+    private boolean hasWaiter() {
         return hasWaiter;
     }
 
-    public AID getCurrentWaiter() {
-        for(int i=0; i<waiters.size(); i++) {
-            if(!unavailableWaiters.contains(waiters.get(i))) {
-                return waiters.get(i);
+    private AID getCurrentWaiter() {
+        for (AID aid : waiters) {
+            if (!unavailableWaiters.contains(aid)) {
+                return aid;
             }
         }
         return null;
     }
 
-    public void getAvailableWaiter() {
+    // Step 0: Find an available waiter (corresponds to waiter's step 0)
+    private void getAvailableWaiter() {
         AID currentWaiter = getCurrentWaiter();
 
         if(currentWaiter == null) {
@@ -92,6 +84,8 @@ public class Customer extends RestaurantAgent {
             @Override
             protected void handleInform(ACLMessage inform) {
                 hasWaiter = true;
+                waiter = currentWaiter;
+                orderDish();
             }
 
             @Override
@@ -99,6 +93,39 @@ public class Customer extends RestaurantAgent {
                 unavailableWaiters.add(currentWaiter);
             }
         });
+    }
+
+    private void decideDish() {
+        String oldDish = desiredDish;
+        String[] dishes = Kitchen.getMenu();
+        Random rand = new Random();
+
+        desiredDish = dishes[rand.nextInt(dishes.length)];
+        while(oldDish == desiredDish) {
+            desiredDish = dishes[rand.nextInt(dishes.length)];
+        }
+    }
+
+    // Step 1: Order dish (corresponds to waiter's step 1)
+    private void orderDish() {
+        // decideDish();
+        // For testing purposes
+        desiredDish = "lolada";
+
+        printMessage("I would like to eat " + desiredDish + ".");
+        try {
+            TimeUnit.SECONDS.sleep(5);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ACLMessage msg = new ACLMessage(ACLMessage.CFP);
+        msg.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+        msg.addReceiver(waiter);
+        msg.setConversationId("order-request");
+        msg.setContent(desiredDish + " " + mood); // Message: <Dish Mood>
+
+        addBehaviour(new OrderPerformer(this, msg));
     }
 
     @Override

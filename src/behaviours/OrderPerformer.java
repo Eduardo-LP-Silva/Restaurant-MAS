@@ -14,12 +14,7 @@ public class OrderPerformer extends SimpleAchieveREInitiator {
     }
 
     @Override
-    protected void handleAgree(ACLMessage msg) {
-        customer.printMessage("Received message: " + msg.getContent());
-    }
-
-    @Override
-    protected void handleInform(ACLMessage msg) {
-        customer.printMessage("Received message: " + msg.getContent());
+    protected void handleRefuse(ACLMessage msg) {
+        customer.printMessage("Got refuse");
     }
 }
