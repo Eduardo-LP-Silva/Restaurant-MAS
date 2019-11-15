@@ -1,8 +1,12 @@
 package behaviours;
 
 import agents.Customer;
+import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.proto.ContractNetInitiator;
+
+import java.util.Random;
+import java.util.Vector;
 
 public class OrderPerformer extends ContractNetInitiator {
     private static final long serialVersionUID = 2897989135282380056L;
@@ -19,6 +23,10 @@ public class OrderPerformer extends ContractNetInitiator {
             case ACLMessage.REFUSE:
                 handleRefuse(msg);
                 break;
+
+            case ACLMessage.PROPOSE:
+                handlePropose(msg);
+                break;
         }
     }
 
@@ -34,5 +42,27 @@ public class OrderPerformer extends ContractNetInitiator {
             customer.orderDish();
         }
     }
+
+    private void handlePropose(ACLMessage propose) {
+        String proposedDish = propose.getContent().split(" - ")[0];
+        if(!proposedDish.equals(customer.getDesiredDish())) {
+            Random rand = new Random();
+            int accept = rand.nextInt(1);
+            if(accept == 0) {
+                customer.sendMessage(propose.getSender(), ACLMessage.REJECT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", "no");
+                this.reset();
+                customer.incrementAttempts();
+                customer.orderDish();
+            }
+            else {
+                customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", proposedDish);
+            }
+
+        }
+        else {
+            customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", customer.getDesiredDish() + " - original");
+        }
+    }
+
 
 }

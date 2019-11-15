@@ -1,7 +1,6 @@
 package agents;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import behaviours.OrderPerformer;
 import behaviours.ServiceSearch;
@@ -18,6 +17,7 @@ public class Customer extends RestaurantAgent {
     private AID waiter;
     private int mood;
     private int attempts;
+    private ServiceSearch serviceSearch;
 
     @Override
     protected void setup() {
@@ -30,9 +30,10 @@ public class Customer extends RestaurantAgent {
 
         hasWaiter = false;
         attempts = 0;
-        desiredDish = null;
-        
-        addBehaviour(new ServiceSearch(this, 10000));
+        desiredDish = "";
+
+        serviceSearch = new ServiceSearch(this, 1000);
+        addBehaviour(serviceSearch);
     }
 
     @Override
@@ -58,6 +59,10 @@ public class Customer extends RestaurantAgent {
 
     public void incrementAttempts() {
         attempts++;
+    }
+
+    public String getDesiredDish() {
+        return desiredDish;
     }
 
     private AID getCurrentWaiter() {
@@ -93,6 +98,7 @@ public class Customer extends RestaurantAgent {
             protected void handleInform(ACLMessage inform) {
                 hasWaiter = true;
                 waiter = currentWaiter;
+                serviceSearch.stop();
                 orderDish();
             }
 
@@ -109,20 +115,15 @@ public class Customer extends RestaurantAgent {
         Random rand = new Random();
 
         desiredDish = dishes[rand.nextInt(dishes.length)];
-        while(oldDish == desiredDish) {
+
+        while(oldDish.equals(desiredDish)) {
             desiredDish = dishes[rand.nextInt(dishes.length)];
         }
     }
 
-    // Step 1: Order dish (corresponds to waiter's step 1)
+    // Step 1: Order dish (corresponds to waiter's steps 1 and 3)
     public void orderDish() {
         decideDish();
-
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         printMessage("I would like to eat " + desiredDish + ".");
 

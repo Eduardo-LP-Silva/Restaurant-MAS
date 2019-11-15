@@ -1,6 +1,5 @@
 package behaviours;
 
-import agents.Customer;
 import agents.RestaurantAgent;
 import jade.core.AID;
 import jade.core.behaviours.TickerBehaviour;

@@ -106,19 +106,19 @@ public class TakeOrder extends CyclicBehaviour{
         if(msg.getPerformative() == ACLMessage.REFUSE) {
             myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent())).setAvailability(0);
             myWaiter.sendMessage(customerID, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                    "dish-final-check", "unavailable");
+                    "order-request", "unavailable");
             myWaiter.printMessage("I'm sorry, but there's been a mistake. We're out of " + dishInfo[0] + ".");
             step = 1;
         }
         else {
             myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(dishInfo[0])).setAvailability(Integer.parseInt(dishInfo[1]));
             myWaiter.printMessage("Your meal is being prepared.");
-            myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000, customerID, dishInfo[0]));
+            // myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000, customerID, dishInfo[0]));
         }
     }
 
     private void getCustomerFeedback(ACLMessage msg) {
-        String[] msgDetails = msg.getContent().split(" ");
+        String[] msgDetails = msg.getContent().split(" - ");
 
         if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
                 || (msgDetails.length > 1 && msgDetails[1].equals("original"))) {
@@ -127,7 +127,7 @@ public class TakeOrder extends CyclicBehaviour{
             myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "start-dish", dish.getName());
             myWaiter.printMessage("Right away!");
-            step = 4;
+            step = 5;
         }
         else {
             myWaiter.printMessage("Okay, what's it going to be then?");
@@ -152,13 +152,13 @@ public class TakeOrder extends CyclicBehaviour{
                 String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
 
                 myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                        "dish-feedback", suggestion.getName() + " " + suggestionInfoSrc);
+                        "order-request", suggestion.getName() + " - " + suggestionInfoSrc);
                 myWaiter.printMessage("How about " + suggestion.getName() + "?");
                 step = 3;
             }
             else {
                 myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                        "dish-feedback", dish.getName() + " " + infoSource);
+                        "order-request", dish.getName() + " - " + infoSource);
                 myWaiter.printMessage("Excellent choice!");
                 step = 3;
             }
