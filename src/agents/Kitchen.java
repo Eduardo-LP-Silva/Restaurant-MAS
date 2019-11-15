@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import behaviours.TakeRequest;
+import jade.core.AID;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -101,5 +102,10 @@ public class Kitchen extends RestaurantAgent
         }
 
         System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " shutting down.");
+    }
+
+    @Override
+    public void addWaiters(AID[] newWaiters) {
+        //Empty function
     }
 }

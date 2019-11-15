@@ -80,7 +80,7 @@ public class TakeOrder extends CyclicBehaviour{
                 template = MessageTemplate.MatchConversationId("start-dish");
                 msg = myWaiter.receive(template);
 
-                if(msg != null) //Message: <dish quantity time>
+                if(msg != null) //Message: <dish quantity time prep>
                     getKitchenFinalCheck(msg);
                 else
                     block();
@@ -103,15 +103,17 @@ public class TakeOrder extends CyclicBehaviour{
     private void getKitchenFinalCheck(ACLMessage msg) {
         String[] dishInfo = msg.getContent().split(" - ");
 
+        //TODO Check if waiter was lying
+
         if(msg.getPerformative() == ACLMessage.REFUSE) {
-            myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msg.getContent())).setAvailability(0);
+            myWaiter.getKnownDish(msg.getContent()).setAvailability(0);
             myWaiter.sendMessage(customerID, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", "unavailable");
             myWaiter.printMessage("I'm sorry, but there's been a mistake. We're out of " + dishInfo[0] + ".");
             step = 1;
         }
         else {
-            myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(dishInfo[0])).setAvailability(Integer.parseInt(dishInfo[1]));
+            myWaiter.getKnownDish(dishInfo[0]).setAvailability(Integer.parseInt(dishInfo[1]));
             myWaiter.printMessage("Your meal is being prepared.");
             myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000, customerID, dishInfo[0]));
         }
@@ -122,7 +124,7 @@ public class TakeOrder extends CyclicBehaviour{
 
         if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
                 || (msgDetails.length > 1 && msgDetails[1].equals("original"))) {
-            Dish dish =  myWaiter.getKnownDishes().get(myWaiter.getKnownDishIndex(msgDetails[0]));
+            Dish dish =  myWaiter.getKnownDish(msgDetails[0]);
             dish.decrementAvailability();
             myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "start-dish", dish.getName());
@@ -149,10 +151,10 @@ public class TakeOrder extends CyclicBehaviour{
             if((customerMood + dish.getCookingTime() - 5 <= 3 || customerMood + dish.getPreparation() - 5 <= 3)
                 && (suggestion = myWaiter.suggestOtherDish(dish, customerMood)) != null) {
 
-                String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
+                //String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
 
                 myWaiter.sendMessage(customerID, ACLMessage.PROPOSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                        "order-request", suggestion.getName() + " - " + suggestionInfoSrc);
+                        "order-request", suggestion.getName() + " - " + infoSource);
                 myWaiter.printMessage("How about " + suggestion.getName() + "?");
                 step = 3;
             }
@@ -183,7 +185,8 @@ public class TakeOrder extends CyclicBehaviour{
 
                 step = 5;
             }
-
+            else
+                System.out.println("Error: Kitchen refused request");
         }
     }
 
@@ -222,9 +225,8 @@ public class TakeOrder extends CyclicBehaviour{
         }
 
         String[] dishDetails = content.split(" - "); //Message format: "dish - availability - cookingTime - preparationRate"
-        boolean reliable = msg.getSender().getName().equals(myWaiter.getKitchen().getName());
         Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
-            Integer.parseInt(dishDetails[3]), reliable);
+            Integer.parseInt(dishDetails[3]), msg.getSender());
         String infoSrc;
             
         if(myWaiter.getKnownDishes().contains(dish)) 
@@ -232,7 +234,7 @@ public class TakeOrder extends CyclicBehaviour{
         else
             myWaiter.getKnownDishes().add(dish);
 
-        if(reliable)
+        if(myWaiter.isDishInfoReliable(dish))
             infoSrc = "kitchen";
         else
             infoSrc = "waiter";

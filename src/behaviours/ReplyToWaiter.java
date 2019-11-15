@@ -32,6 +32,7 @@ public class ReplyToWaiter extends CyclicBehaviour {
 
         if(msg != null) {
             ACLMessage reply = msg.createReply();
+            //TODO Decide to answer or not based on waiter reputation
             myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     msg.getConversationId(), msg.getContent());
             myWaiter.printMessage("Hmm, let me think...");

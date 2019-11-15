@@ -31,9 +31,8 @@ public class TakeRequest extends CyclicBehaviour{
 
             if(myKitchen.checkMeal(meal)) {
                 int[] mealInfo = myKitchen.getMealInfo(meal);
-                mealString = meal + " - " + mealInfo[0] + " - " + mealInfo[1];
-                if(convId.equals("dish-details"))
-                    mealString += " - " + mealInfo[2];
+                mealString = meal + " - " + mealInfo[0] + " - " + mealInfo[1] + " - " + mealInfo[2];
+
                 reply.setContent(mealString);
                 reply.setPerformative(ACLMessage.INFORM);
             } else {

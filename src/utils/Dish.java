@@ -1,18 +1,20 @@
 package utils;
 
+import jade.core.AID;
+
 public class Dish {
     private String name;
     private int availability;
     private int cookingTime;
     private int preparation;
-    private boolean reliable;
+    private AID infoSrc;
 
-    public Dish(String name, int availability, int cookingTime, int preparation, boolean reliable) {
+    public Dish(String name, int availability, int cookingTime, int preparation, AID infoSrc) {
         this.name = name;
         this.availability = availability;
         this.cookingTime = cookingTime;
         this.preparation = preparation;
-        this.reliable = reliable;
+        this.infoSrc = infoSrc;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class Dish {
         return preparation;
     }
 
-    public boolean isReliable() {
-        return reliable;
+    public AID getInfoSrc() {
+        return infoSrc;
     }
 }

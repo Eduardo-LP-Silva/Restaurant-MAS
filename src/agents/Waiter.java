@@ -113,17 +113,18 @@ public class Waiter extends RestaurantAgent
      */
     public void updateKnownDish(Dish newDish) {
         int dishIndex = knownDishes.indexOf(newDish);
+        Dish knownDish = knownDishes.get(dishIndex);
         
-        if(newDish.isReliable())
+        if(isDishInfoReliable(newDish) || !isDishInfoReliable(knownDish))
             knownDishes.set(dishIndex, newDish);
         else {
-            Dish knownDish = knownDishes.get(dishIndex);
-
-            if(knownDish.isReliable() && newDish.getAvailability() < knownDish.getAvailability())
-                knownDish.setAvailability(newDish.getAvailability());
-            else
-                knownDishes.set(dishIndex, newDish); 
+                if(newDish.getAvailability() < knownDish.getAvailability())
+                    knownDish.setAvailability(newDish.getAvailability());
         }    
+    }
+
+    public boolean isDishInfoReliable(Dish dish) {
+        return dish.getInfoSrc().equals(kitchen);
     }
 
     public Dish suggestOtherDish(Dish originalDish, int customerMood) {
@@ -170,6 +171,7 @@ public class Waiter extends RestaurantAgent
 
     }
 
+    @Override
     public void addWaiters(AID[] newWaiters) {
         boolean found;
 
@@ -244,6 +246,14 @@ public class Waiter extends RestaurantAgent
         return waiters;
     }
 
+    public Pair<AID, Boolean> getWaiter(AID waiter) {
+        for(Pair<AID, Boolean> knownWaiter : waiters)
+            if(knownWaiter.getKey().equals(waiter))
+                return knownWaiter;
+
+        return null;
+    }
+
     public ArrayList<Dish> getKnownDishes() {
         return knownDishes;
     }
@@ -258,5 +268,9 @@ public class Waiter extends RestaurantAgent
                 return i;
 
         return -1;
+    }
+
+    public Dish getKnownDish(String dishName) {
+        return knownDishes.get(getKnownDishIndex(dishName));
     }
 }
