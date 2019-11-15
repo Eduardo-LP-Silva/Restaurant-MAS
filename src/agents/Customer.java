@@ -26,7 +26,8 @@ public class Customer extends RestaurantAgent {
         printMessage("Hello! Customer " + getAID().getLocalName() + " is ready.");
 
         Random random = new Random();
-        mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
+       // mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
+        mood = 3;
 
         hasWaiter = false;
         attempts = 0;

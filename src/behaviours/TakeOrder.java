@@ -179,9 +179,7 @@ public class TakeOrder extends CyclicBehaviour{
         String content = msg.getContent();
 
         if(msg.getPerformative() == ACLMessage.FAILURE) {
-            if(msg.getSender().equals(myWaiter.getKitchen()) ||
-                    (!msg.getSender().equals(myWaiter.getKitchen())
-                            && myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1)) {
+            if(msg.getSender().equals(myWaiter.getKitchen())) {
                 myWaiter.printMessage("I'm afraid we don't serve that dish in here. Try another one.");
                 myWaiter.sendMessage(customerID, ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                         "order-request", "not-found");
@@ -189,10 +187,21 @@ public class TakeOrder extends CyclicBehaviour{
                 return;
             }
             else {
-                myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
-                        FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
+
+                if(myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1) {
+                    myWaiter.printMessage("It seems I'll have to ask the kitchen staff after all...");
+                    myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST,
+                            FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
+                }
+                else {
+                    myWaiter.printMessage("How about you "
+                            + myWaiter.getWaiters().get(myWaiter.getWaiterIndex()).getLocalName() + "?");
+                    myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                            FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
+                }
 
                 step = 5;
+                return;
             }
         }
 
