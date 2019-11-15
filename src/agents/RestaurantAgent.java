@@ -9,12 +9,6 @@ import java.util.ArrayList;
 public abstract class RestaurantAgent extends Agent {
     protected String role;
 
-    public void addWaiters(AID[] newWaiters) {
-        for(AID newWaiter : newWaiters)
-            if (!waiters.contains(newWaiter) && !newWaiter.equals(this.getAID()))
-                waiters.add(newWaiter);
-    }
-
     public abstract void addWaiters(AID[] newWaiters);
 
     public void sendMessage(AID aid, int performative, String protocol , String conversationID, String content) {

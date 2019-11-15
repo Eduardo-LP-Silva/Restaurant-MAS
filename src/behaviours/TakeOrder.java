@@ -201,21 +201,18 @@ public class TakeOrder extends CyclicBehaviour{
             else {
                 AID nextAgent = myWaiter.getNextReliableWaiter();
 
-                if(nextAgent == null)
-                    nextAgent = myWaiter.getKitchen();
-
                 myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
                         FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
 
-                if(myWaiter.getWaiterIndex() == myWaiter.getWaiters().size() - 1) {
+                if(nextAgent == null) {
                     myWaiter.printMessage("It seems I'll have to ask the kitchen staff after all...");
                     myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST,
                             FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
                 }
                 else {
                     myWaiter.printMessage("How about you "
-                            + myWaiter.getWaiters().get(myWaiter.getWaiterIndex()).getLocalName() + "?");
-                    myWaiter.sendMessage(myWaiter.getNextWaiter(), ACLMessage.REQUEST,
+                            + myWaiter.getWaiters().get(myWaiter.getWaiterIndex()).getKey().getLocalName() + "?");
+                    myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
                             FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
                 }
 

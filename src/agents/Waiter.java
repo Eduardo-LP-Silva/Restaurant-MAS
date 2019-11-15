@@ -25,7 +25,7 @@ public class Waiter extends RestaurantAgent
     private ArrayList<Pair<AID, Boolean>> waiters = new ArrayList<>();
     private int noCustomers = 0;
     private double tips = 0;
-    private boolean trusthworthy;
+    private boolean trustworthy;
     private int waiterIndex = 0;
 
     protected void setup() {
@@ -39,7 +39,7 @@ public class Waiter extends RestaurantAgent
             return;
         }
 
-        trusthworthy = Boolean.parseBoolean((String) args[0]);
+        trustworthy = Boolean.parseBoolean((String) args[0]);
 
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
@@ -150,7 +150,7 @@ public class Waiter extends RestaurantAgent
             String dishDetails = dishName + " ";
 
             //75% chance of lying
-            if(!trusthworthy && rand.nextInt(99) + 1 <= 75) {
+            if(!trustworthy && rand.nextInt(99) + 1 <= 75) {
                 if(requestedDish.getAvailability() == 0)
                     dishDetails += rand.nextInt(4) + 1; //To make the other waiter look bad when he finds out it's 0
                 else
@@ -175,6 +175,9 @@ public class Waiter extends RestaurantAgent
 
         for(AID newWaiter : newWaiters) {
             found = false;
+
+            if(newWaiter.equals(this.getAID()))
+                continue;
 
             for(Pair<AID, Boolean> waiter : waiters)
                 if(waiter.getKey().equals(newWaiter)) {
