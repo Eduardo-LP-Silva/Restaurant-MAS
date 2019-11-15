@@ -65,6 +65,14 @@ public class Customer extends RestaurantAgent {
         return desiredDish;
     }
 
+    public AID getWaiter() {
+        return waiter;
+    }
+
+    public int getMood() {
+        return mood;
+    }
+
     private AID getCurrentWaiter() {
         for (AID aid : waiters) {
             if (!unavailableWaiters.contains(aid)) {

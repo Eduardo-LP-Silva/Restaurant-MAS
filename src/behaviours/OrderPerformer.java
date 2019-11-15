@@ -3,10 +3,10 @@ package behaviours;
 import agents.Customer;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
 
 import java.util.Random;
-import java.util.Vector;
 
 public class OrderPerformer extends ContractNetInitiator {
     private static final long serialVersionUID = 2897989135282380056L;
@@ -30,6 +30,7 @@ public class OrderPerformer extends ContractNetInitiator {
         }
     }
 
+    // The dish ordered isn't available
     @Override
     protected void handleRefuse(ACLMessage msg) {
         if (customer.getAttempts() >= 3) {
@@ -43,6 +44,7 @@ public class OrderPerformer extends ContractNetInitiator {
         }
     }
 
+    // The waiter proposes a dish (it could be the same I suggested if he agrees that it is a good choice)
     private void handlePropose(ACLMessage propose) {
         String proposedDish = propose.getContent().split(" - ")[0];
         if(!proposedDish.equals(customer.getDesiredDish())) {
@@ -56,11 +58,16 @@ public class OrderPerformer extends ContractNetInitiator {
             }
             else {
                 customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", proposedDish);
+                customer.printMessage("That sounds lovely!");
+                customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
+                this.reset();
             }
 
         }
         else {
             customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", customer.getDesiredDish() + " - original");
+            customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
+            this.reset();
         }
     }
 

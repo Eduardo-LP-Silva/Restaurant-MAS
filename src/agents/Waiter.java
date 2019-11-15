@@ -22,7 +22,7 @@ public class Waiter extends RestaurantAgent
     private AID kitchen;
     private ArrayList<Dish> knownDishes = new ArrayList<>();
     private int noCustomers = 0;
-    private int tips = 0;
+    private double tips = 0;
     private boolean trusthworthy;
     private int waiterIndex = 0;
 
@@ -180,7 +180,7 @@ public class Waiter extends RestaurantAgent
         noCustomers++;
     }
 
-    public void addTip(int tip) {
+    public void addTip(double tip) {
         tips += tip;
     }
 
@@ -208,7 +208,7 @@ public class Waiter extends RestaurantAgent
         return knownDishes;
     }
 
-    public int getTips() {
+    public double getTips() {
         return tips;
     }
 
