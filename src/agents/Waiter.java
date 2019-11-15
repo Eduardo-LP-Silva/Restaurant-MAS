@@ -24,7 +24,7 @@ public class Waiter extends RestaurantAgent
     private ArrayList<Dish> knownDishes = new ArrayList<>();
     private ArrayList<Pair<AID, Boolean>> waiters = new ArrayList<>();
     private int noCustomers = 0;
-    private int tips = 0;
+    private double tips = 0;
     private boolean trusthworthy;
     private int waiterIndex = 0;
 
@@ -35,6 +35,7 @@ public class Waiter extends RestaurantAgent
 
         if(args.length != 1) {
             System.out.println("Usage: Waiter <trustworthy>");
+            doDelete();
             return;
         }
 
@@ -138,9 +139,11 @@ public class Waiter extends RestaurantAgent
     public void informAboutDish(AID otherWaiter, String dishName) {
         int dishIndex = getKnownDishIndex(dishName);
 
-        if(dishIndex == -1)
+        if(dishIndex == -1) {
             sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
-                    "dish-details", "not-found");
+                    "dish-details", dishName);
+            printMessage("I don't know about that one, try someone else...");
+        }
         else {
             Dish requestedDish = knownDishes.get(dishIndex);
             Random rand = new Random();
@@ -160,6 +163,7 @@ public class Waiter extends RestaurantAgent
                 dishDetails += requestedDish.getAvailability() + " " + requestedDish.getCookingTime() + " "
                         + requestedDish.getPreparation();
 
+            printMessage("Yes, here you go");
             sendMessage(otherWaiter, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "dish-details", dishDetails);
         }
@@ -213,7 +217,7 @@ public class Waiter extends RestaurantAgent
         noCustomers++;
     }
 
-    public void addTip(int tip) {
+    public void addTip(double tip) {
         tips += tip;
     }
 
@@ -241,7 +245,7 @@ public class Waiter extends RestaurantAgent
         return knownDishes;
     }
 
-    public int getTips() {
+    public double getTips() {
         return tips;
     }
 

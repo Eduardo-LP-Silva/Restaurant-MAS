@@ -28,9 +28,9 @@ public class ServeMeal extends WakerBehaviour {
     public void onWake() {
         switch(step) {
             case 0:
+                myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
                 myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                         "meal-delivering", dish);
-                myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
                 step = 1;
                 getCustomerFeedback();
                 break;
@@ -40,26 +40,21 @@ public class ServeMeal extends WakerBehaviour {
                 break;
 
             case 2:
-                receiveTip();
+                MessageTemplate template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchConversationId("meal-delivering"));
+                ACLMessage msg = myWaiter.receive(template);
+                if(msg != null) {
+                    receiveTip(msg);
+                }
+
                 break;
         }
 
     }
 
-    private void receiveTip() {
-        MessageTemplate template = MessageTemplate.MatchConversationId("tip");
-        ACLMessage msg = myWaiter.receive(template);
-
-        if(msg == null) {
-            block();
-            reset();
-        }
-
-        if(msg.getPerformative() == ACLMessage.INFORM) {
-            myWaiter.addTip(Integer.parseInt(msg.getContent()));
-            myWaiter.printMessage("Thank you very much " + customer.getLocalName() + "for the " + msg.getContent() + "€!");
-            myWaiter.removeCustomer();
-        }
+    private void receiveTip(ACLMessage msg) {
+        myWaiter.addTip(Double.parseDouble(msg.getContent()));
+        myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
+        myWaiter.removeCustomer();
 
         myWaiter.printMessage("I have collected " + myWaiter.getTips() + "€ in tips so far!");
     }
@@ -74,6 +69,6 @@ public class ServeMeal extends WakerBehaviour {
         }
 
         step = 2;
-        receiveTip();
     }
+
 }
