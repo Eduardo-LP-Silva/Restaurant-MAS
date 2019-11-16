@@ -3,6 +3,7 @@ package agents;
 import java.util.ArrayList;
 import java.util.Random;
 
+import behaviours.AttendCustomer;
 import behaviours.ReplyToWaiter;
 import behaviours.ServiceSearch;
 import behaviours.TakeOrder;
@@ -19,11 +20,10 @@ import utils.Pair;
 public class Waiter extends RestaurantAgent
 {
     private static final long serialVersionUID = 7110642579660810600L;
-    private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
     private ArrayList<Dish> knownDishes = new ArrayList<>();
     private ArrayList<Pair<AID, Boolean>> waiters = new ArrayList<>();
-    private int noCustomers = 0;
+    private AID customerID;
     private double tips = 0;
     private boolean trustworthy;
     private int waiterIndex = 0;
@@ -61,6 +61,7 @@ public class Waiter extends RestaurantAgent
         if(!searchForKitchen())
             this.doDelete();
 
+        this.addBehaviour(new AttendCustomer(this));
         this.addBehaviour(new TakeOrder(this));
         this.addBehaviour(new ServiceSearch(this, 1000));
         this.addBehaviour(new ReplyToWaiter(this));
@@ -222,24 +223,20 @@ public class Waiter extends RestaurantAgent
             return waiter.getKey();
     }
 
-    public void addCustomer() {
-        noCustomers++;
-    }
-
     public void addTip(double tip) {
         tips += tip;
     }
 
-    public void removeCustomer() {
-        noCustomers--;
-    }
-
     public boolean isBusy() {
-        return noCustomers >= MAX_CLIENT_NO;
+        return customerID != null;
     }
 
     public AID getKitchen() {
         return kitchen;
+    }
+
+    public AID getCustomerID() {
+        return customerID;
     }
 
     public int getWaiterIndex() {
@@ -281,5 +278,9 @@ public class Waiter extends RestaurantAgent
             return knownDishes.get(index);
         else
             return null;
+    }
+
+    public void setCustomerID(AID cid) {
+        customerID = cid;
     }
 }

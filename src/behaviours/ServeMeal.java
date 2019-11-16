@@ -54,7 +54,6 @@ public class ServeMeal extends WakerBehaviour {
     private void receiveTip(ACLMessage msg) {
         myWaiter.addTip(Double.parseDouble(msg.getContent()));
         myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
-        myWaiter.removeCustomer();
 
         myWaiter.printMessage("I have collected " + myWaiter.getTips() + "€ in tips so far!");
     }
