@@ -23,9 +23,13 @@ public class OrderPerformer extends ContractNetInitiator {
             case ACLMessage.REFUSE:
                 handleRefuse(msg);
                 break;
-
             case ACLMessage.PROPOSE:
                 handlePropose(msg);
+                break;
+            case ACLMessage.FAILURE:
+                handleFailure(msg);
+                break;
+            default:
                 break;
         }
     }
@@ -47,16 +51,25 @@ public class OrderPerformer extends ContractNetInitiator {
     // The waiter proposes a dish (it could be the same I suggested if he agrees that it is a good choice)
     private void handlePropose(ACLMessage propose) {
         String proposedDish = propose.getContent().split(" - ")[0];
+        String infoSource = propose.getContent().split(" - ")[1];
+
+        if (infoSource.equals("kitchen")) {
+           customer.decrementMood();
+        }
+
         if(!proposedDish.equals(customer.getDesiredDish())) {
             Random rand = new Random();
             int accept = rand.nextInt(1);
+
             if(accept == 0) {
                 customer.sendMessage(propose.getSender(), ACLMessage.REJECT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", "no");
                 this.reset();
+                customer.printMessage("That doesn't sound so good, think I'm gonna look in the menu again...");
                 customer.incrementAttempts();
                 customer.orderDish();
             }
             else {
+                customer.decrementMood();
                 customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", proposedDish);
                 customer.printMessage("That sounds lovely!");
                 customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
@@ -65,11 +78,15 @@ public class OrderPerformer extends ContractNetInitiator {
 
         }
         else {
+            customer.printMessage("Perfect!");
             customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", customer.getDesiredDish() + " - original");
             customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
             this.reset();
         }
     }
 
-
+    @Override
+    protected void handleFailure(ACLMessage failure) {
+        handleRefuse(failure);
+    }
 }
