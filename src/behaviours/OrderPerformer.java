@@ -37,9 +37,7 @@ public class OrderPerformer extends ContractNetInitiator {
         }
     }
 
-    // The dish ordered isn't available
-    @Override
-    protected void handleRefuse(ACLMessage msg) {
+    private void orderAgain() {
         if (customer.getAttempts() >= 3) {
             customer.printMessage("I've tried enough, leaving now...");
             customer.doDelete();
@@ -49,6 +47,12 @@ public class OrderPerformer extends ContractNetInitiator {
             customer.incrementAttempts();
             customer.orderDish();
         }
+    }
+
+    // The dish ordered isn't available
+    @Override
+    protected void handleRefuse(ACLMessage msg) {
+        orderAgain();
     }
 
     // The waiter proposes a dish (it could be the same I suggested if he agrees that it is a good choice)
@@ -68,16 +72,13 @@ public class OrderPerformer extends ContractNetInitiator {
             if(accept == 0) {
                 customer.sendMessage(propose.getSender(), ACLMessage.REJECT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", "no");
                 this.reset();
-                customer.printMessage("That doesn't sound so good, think I'm gonna look in the menu again...");
-                customer.incrementAttempts();
-                customer.orderDish();
+                customer.printMessage("That doesn't sound so good...");
+                orderAgain();
             }
             else {
                 customer.decrementMood();
                 customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", proposedDish);
                 customer.printMessage("That sounds good!");
-                customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
-                this.reset();
             }
 
         }
@@ -112,7 +113,8 @@ public class OrderPerformer extends ContractNetInitiator {
             customer.incrementMood();
         }
 
-        customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
+        ReceiveMeal receiveMeal = new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST))));
+        customer.addBehaviour(receiveMeal);
         this.reset();
     }
 }
