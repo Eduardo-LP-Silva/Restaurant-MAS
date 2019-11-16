@@ -133,10 +133,8 @@ public class TakeOrder extends CyclicBehaviour{
                     "start-dish", dish.getName());
             step = 5;
         }
-        else {
-            myWaiter.printMessage("Okay, what's it going to be then?");
+        else
             step = 1;
-        }
     }
 
     private void evaluateDish(Dish dish, String infoSource) {
@@ -150,7 +148,7 @@ public class TakeOrder extends CyclicBehaviour{
             step = 1;
         } 
         else
-            if((customerMood + dish.getCookingTime() - 5 <= 3 || customerMood + dish.getPreparation() - 5 <= 3)
+            if((customerMood - dish.getCookingTime() - 5 <= 3 || customerMood + dish.getPreparation() - 5 <= 3)
                 && (suggestion = myWaiter.suggestOtherDish(dish, customerMood)) != null) {
 
                 //String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
