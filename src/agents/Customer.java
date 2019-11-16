@@ -27,8 +27,9 @@ public class Customer extends RestaurantAgent {
         printMessage("Hello! Customer " + getAID().getLocalName() + " is ready.");
 
         Random random = new Random();
-       // mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
-        mood = 3;
+        mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
+
+        printMessage("My mood: " + mood);
 
         hasWaiter = false;
         attempts = 0;
@@ -78,6 +79,12 @@ public class Customer extends RestaurantAgent {
     public void decrementMood() {
         if (mood > 0) {
             mood--;
+        }
+    }
+
+    public void incrementMood() {
+        if (mood < 10) {
+            mood++;
         }
     }
 
@@ -155,6 +162,7 @@ public class Customer extends RestaurantAgent {
 
     @Override
     protected void takeDown() {
+        printMessage("My mood: " + mood);
         printMessage("Going home");
     }
 

@@ -29,6 +29,9 @@ public class OrderPerformer extends ContractNetInitiator {
             case ACLMessage.FAILURE:
                 handleFailure(msg);
                 break;
+            case ACLMessage.INFORM:
+                handleInform(msg);
+                break;
             default:
                 break;
         }
@@ -55,6 +58,7 @@ public class OrderPerformer extends ContractNetInitiator {
 
         if (infoSource.equals("kitchen")) {
            customer.decrementMood();
+           customer.printMessage("Hey, it took a while...");
         }
 
         if(!proposedDish.equals(customer.getDesiredDish())) {
@@ -71,22 +75,44 @@ public class OrderPerformer extends ContractNetInitiator {
             else {
                 customer.decrementMood();
                 customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", proposedDish);
-                customer.printMessage("That sounds lovely!");
+                customer.printMessage("That sounds good!");
                 customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
                 this.reset();
             }
 
         }
         else {
-            customer.printMessage("Perfect!");
+            customer.printMessage("Perfect, just what I wanted!");
             customer.sendMessage(propose.getSender(), ACLMessage.ACCEPT_PROPOSAL, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "dish-feedback", customer.getDesiredDish() + " - original");
-            customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
-            this.reset();
         }
     }
 
     @Override
     protected void handleFailure(ACLMessage failure) {
         handleRefuse(failure);
+    }
+
+    @Override
+    protected void handleInform(ACLMessage inform) {
+        String[] mealInfo = inform.getContent().split(" - "); // < preparationTime - wellCooked >
+        int preparationTime = Integer.parseInt(mealInfo[0]); // 1 to 10, the higher the value, the lower the mood
+        int wellCooked = Integer.parseInt(mealInfo[1]); // 1 to 10, the lower the value, the lower the mood
+
+        if (preparationTime < 5) {
+            customer.incrementMood();
+        }
+        else if (preparationTime > 5) {
+            customer.decrementMood();
+        }
+
+        if (wellCooked < 5) {
+            customer.decrementMood();
+        }
+        else if (wellCooked > 5) {
+            customer.incrementMood();
+        }
+
+        customer.addBehaviour(new ReceiveMeal(customer, MessageTemplate.and(MessageTemplate.MatchSender(customer.getWaiter()), MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"), MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_REQUEST)))));
+        this.reset();
     }
 }

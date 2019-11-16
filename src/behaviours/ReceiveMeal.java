@@ -6,6 +6,8 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Random;
 
 public class ReceiveMeal extends SimpleAchieveREResponder {
@@ -37,6 +39,10 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
         Random rand = new Random();
         // Maximum tip: 5.99
         double tip = customer.getMood() * 0.5 + 0.01 * rand.nextInt(99);
+
+        BigDecimal bd = BigDecimal.valueOf(tip);
+        bd = bd.setScale(2, RoundingMode.HALF_UP);
+        tip = bd.doubleValue();
 
         ACLMessage notification = request.createReply();
         notification.setPerformative(ACLMessage.INFORM);
