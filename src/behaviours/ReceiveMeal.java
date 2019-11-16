@@ -1,6 +1,7 @@
 package behaviours;
 
 import agents.Customer;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
@@ -35,7 +36,7 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
     // Tip waiter
     // Customer always tips, although it can tip low
     @Override
-    protected ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
+    protected synchronized ACLMessage prepareResultNotification(ACLMessage request, ACLMessage response) {
         Random rand = new Random();
         // Maximum tip: 5.99
         double tip = customer.getMood() * 0.5 + 0.01 * rand.nextInt(99);
@@ -50,12 +51,15 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
         notification.setContent("" + tip);
 
         customer.printMessage("Here's your tip: " + tip + "€.");
-        done = true;
-        return notification;
-    }
 
-    public boolean isDone() {
-        return done;
+        customer.addBehaviour(new OneShotBehaviour() {
+            @Override
+            public void action() {
+                customer.doDelete();
+            }
+        });
+
+        return notification;
     }
 
 }
