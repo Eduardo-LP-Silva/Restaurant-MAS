@@ -95,8 +95,11 @@ public class TakeOrder extends CyclicBehaviour{
                 Integer.parseInt(dishInfo[3]))) {
             Pair<AID, Boolean> otherWaiter = myWaiter.getWaiter(dish.getInfoSrc());
 
-            if(otherWaiter != null)
+            if(otherWaiter != null) {
                 otherWaiter.setValue(false);
+                myWaiter.printMessage("*Thinking* " + otherWaiter.getKey().getLocalName() + " was lying, I'll take note of that...");
+            }
+
         }
 
         if(msg.getPerformative() == ACLMessage.REFUSE) {

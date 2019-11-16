@@ -27,7 +27,7 @@ public class AttendCustomer extends CyclicBehaviour {
 
     private void attendCustomer(ACLMessage msg) {
         if(myWaiter.isBusy()) {
-            myWaiter.printMessage("I'm sorry, I'm a bit busy at the moment.");
+            myWaiter.printMessage("I'm sorry, I'm a bit busy at the moment, " + msg.getSender().getLocalName() + ".");
             myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     msg.getConversationId(), "busy");
         }

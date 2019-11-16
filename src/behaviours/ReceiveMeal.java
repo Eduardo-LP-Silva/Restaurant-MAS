@@ -24,6 +24,7 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
     protected ACLMessage prepareResponse(ACLMessage request) {
         ACLMessage response = request.createReply();
         response.setPerformative(ACLMessage.AGREE);
+        response.setConversationId("meal-delivering");
         response.setContent("ok");
 
         customer.printMessage("Thank you!");
@@ -45,11 +46,12 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
 
         ACLMessage notification = request.createReply();
         notification.setPerformative(ACLMessage.INFORM);
+        notification.setConversationId("meal-delivering");
         notification.setContent("" + tip);
 
-        customer.printMessage("Here's your tip: " + tip + "€. See you next time!");
-        done = true;
-        customer.doDelete();
+        customer.printMessage("Here's your tip: " + tip + "€.");
+        //done = true;
+        //customer.doDelete();
         return notification;
     }
 

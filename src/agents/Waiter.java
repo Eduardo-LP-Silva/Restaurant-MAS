@@ -61,9 +61,9 @@ public class Waiter extends RestaurantAgent
         if(!searchForKitchen())
             this.doDelete();
 
+        this.addBehaviour(new ServiceSearch(this, 500));
         this.addBehaviour(new AttendCustomer(this));
         this.addBehaviour(new TakeOrder(this));
-        this.addBehaviour(new ServiceSearch(this, 1000));
         this.addBehaviour(new ReplyToWaiter(this));
     }
 
@@ -139,32 +139,37 @@ public class Waiter extends RestaurantAgent
     }
 
     public void informAboutDish(AID otherWaiter, String dishName) {
+        Random rand = new Random();
+        int lie = rand.nextInt(99) + 1;
         int dishIndex = getKnownDishIndex(dishName);
 
-        if(dishIndex == -1) {
+        if((dishIndex == -1 && trustworthy) || (!trustworthy && lie > 75)) {
             printMessage("I don't know about that one, try someone else...");
             sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "dish-details", dishName);
         }
         else {
-            Dish requestedDish = knownDishes.get(dishIndex);
-            Random rand = new Random();
-            String dishDetails = dishName + " ";
+            Dish requestedDish = null;
+
+            if(dishIndex != -1)
+                requestedDish = knownDishes.get(dishIndex);
+
+            String dishDetails = dishName + " - ";
             String messageToPrint = "";
 
             //75% chance of lying
-            if(!trustworthy && rand.nextInt(99) + 1 <= 75) {
-                if(requestedDish.getAvailability() == 0)
-                    dishDetails += rand.nextInt(4) + 1; //To make the other waiter look bad when he finds out it's 0
+            if(!trustworthy &&  lie <= 75) {
+                if(requestedDish == null || requestedDish.getAvailability() == 0)
+                    dishDetails += rand.nextInt(5) + 1; //To make the other waiter look bad when he finds out it's 0
                 else
                     dishDetails += rand.nextInt(requestedDish.getAvailability());
 
-                dishDetails += " " + rand.nextInt(requestedDish.getCookingTime() * 2) + " "
-                        + rand.nextInt(requestedDish.getPreparation());
+                dishDetails += " - " + (rand.nextInt(6) + 5) + " - "
+                        + rand.nextInt(rand.nextInt(5) + 1);
                 messageToPrint = "*Lies* ";
             }
             else
-                dishDetails += requestedDish.getAvailability() + " " + requestedDish.getCookingTime() + " "
+                dishDetails += requestedDish.getAvailability() + " - " + requestedDish.getCookingTime() + " - "
                         + requestedDish.getPreparation();
 
             messageToPrint += "Yes, here you go: " + dishDetails;
