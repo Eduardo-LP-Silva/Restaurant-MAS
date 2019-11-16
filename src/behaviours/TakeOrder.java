@@ -225,7 +225,7 @@ public class TakeOrder extends CyclicBehaviour{
                 }
                 else {
                     myWaiter.printMessage("How about you "
-                            + myWaiter.getWaiters().get(myWaiter.getWaiterIndex()).getKey().getLocalName() + "?");
+                            + nextAgent.getLocalName() + "?");
                     myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
                             FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
                 }
