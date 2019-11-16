@@ -1,7 +1,6 @@
 package behaviours;
 
 import agents.Customer;
-import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.SimpleAchieveREResponder;
@@ -11,10 +10,10 @@ import java.math.RoundingMode;
 import java.util.Random;
 
 public class ReceiveMeal extends SimpleAchieveREResponder {
-    Customer customer;
-    Boolean done;
+    private Customer customer;
+    private Boolean done;
 
-    public ReceiveMeal(Customer c, MessageTemplate mt) {
+    ReceiveMeal(Customer c, MessageTemplate mt) {
         super(c, mt);
         customer = c;
         done = false;
