@@ -14,7 +14,6 @@ public class ServeMeal extends WakerBehaviour {
     private AID customer;
     private Waiter myWaiter;
     private String dish;
-    private int step = 0;
 
     ServeMeal(Agent a, long timeout, AID customer, String dish) {
         super(a, timeout);
@@ -26,49 +25,45 @@ public class ServeMeal extends WakerBehaviour {
 
     @Override
     public void onWake() {
-        switch(step) {
-            case 0:
-                myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
-                myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
-                        "meal-delivering", dish);
-                step = 1;
-                getCustomerFeedback();
-                break;
-
-            case 1:
-                getCustomerFeedback();
-                break;
-
-            case 2:
-                MessageTemplate template = MessageTemplate.and(MessageTemplate.MatchPerformative(ACLMessage.INFORM), MessageTemplate.MatchConversationId("meal-delivering"));
-                ACLMessage msg = myWaiter.receive(template);
-                if(msg != null) {
-                    receiveTip(msg);
-                }
-
-                break;
-        }
-
+        myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
+        myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                "meal-delivering", dish);
+        getCustomerFeedback();
     }
 
     private void receiveTip(ACLMessage msg) {
         myWaiter.addTip(Double.parseDouble(msg.getContent()));
         myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
-        myWaiter.removeCustomer();
 
         myWaiter.printMessage("I have collected " + myWaiter.getTips() + "€ in tips so far!");
     }
 
     private void getCustomerFeedback() {
-        MessageTemplate template = MessageTemplate.MatchConversationId("meal-delivering");
-        ACLMessage msg = myWaiter.receive(template);
+        MessageTemplate template = MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"),
+                MessageTemplate.MatchPerformative(ACLMessage.AGREE));
+        ACLMessage msg;
 
-        if(msg == null) {
-            block();
-            reset();
+        do {
+            msg = myWaiter.receive(template);
+
+            if(msg == null)
+                block();
         }
+        while(msg == null);
 
-        step = 2;
+        ACLMessage secondMessage;
+        MessageTemplate secondTemplate =  MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"),
+                MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+
+        do {
+            secondMessage = myWaiter.receive(secondTemplate);
+
+            if(secondMessage == null)
+                block();
+        }
+        while(secondMessage == null);
+
+        receiveTip(secondMessage);
     }
 
 }

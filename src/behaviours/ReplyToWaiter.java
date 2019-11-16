@@ -1,10 +1,12 @@
 package behaviours;
 
 import agents.Waiter;
+import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import utils.Pair;
 
 public class ReplyToWaiter extends CyclicBehaviour {
     private static final long serialVersionUID = -7489339939177286595L;
@@ -31,10 +33,18 @@ public class ReplyToWaiter extends CyclicBehaviour {
         msg = myAgent.receive(template);
 
         if(msg != null) {
-            ACLMessage reply = msg.createReply();
-            myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
-                    msg.getConversationId(), "");
+            Pair<AID, Boolean> requestingWaiter = myWaiter.getWaiter(msg.getSender());
+
+            if(requestingWaiter != null && !requestingWaiter.getValue()) {
+                myWaiter.printMessage("You've lied to me before, try someone else...");
+                myWaiter.sendMessage(msg.getSender(), ACLMessage.REFUSE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                        msg.getConversationId(), msg.getContent());
+                return;
+            }
+
             myWaiter.printMessage("Hmm, let me think...");
+            myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    msg.getConversationId(), msg.getContent());
             myWaiter.informAboutDish(msg.getSender(), msg.getContent());
         }
         else

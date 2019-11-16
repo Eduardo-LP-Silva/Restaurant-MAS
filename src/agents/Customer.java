@@ -15,6 +15,7 @@ public class Customer extends RestaurantAgent {
     private HashSet<AID> unavailableWaiters = new HashSet<>();
     private boolean hasWaiter;
     private AID waiter;
+    private ArrayList<AID> waiters = new ArrayList<>();
     private int mood;
     private int attempts;
     private ServiceSearch serviceSearch;
@@ -26,8 +27,9 @@ public class Customer extends RestaurantAgent {
         printMessage("Hello! Customer " + getAID().getLocalName() + " is ready.");
 
         Random random = new Random();
-       // mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
-        mood = 3;
+        mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
+
+        printMessage("My mood: " + mood);
 
         hasWaiter = false;
         attempts = 0;
@@ -74,13 +76,38 @@ public class Customer extends RestaurantAgent {
         return mood;
     }
 
+    public void decrementMood() {
+        if (mood > 0) {
+            mood--;
+        }
+    }
+
+    public void incrementMood() {
+        if (mood < 10) {
+            mood++;
+        }
+    }
+
     private AID getCurrentWaiter() {
+        Random random = new Random();
+        int index = random.nextInt(waiters.size());
+
+        boolean allWaitersUnavailable = true;
+
         for (AID aid : waiters) {
-            if (!unavailableWaiters.contains(aid)) {
-                return aid;
+            if(!unavailableWaiters.contains(aid)) {
+                allWaitersUnavailable = false;
             }
         }
-        return null;
+
+        if(allWaitersUnavailable) {
+            return null;
+        }
+
+        while (unavailableWaiters.contains(waiters.get(index))) {
+            index = random.nextInt(waiters.size());
+        }
+        return waiters.get(index);
     }
 
     // Step 0: Find an available waiter (corresponds to waiter's step 0)
@@ -148,6 +175,7 @@ public class Customer extends RestaurantAgent {
 
     @Override
     protected void takeDown() {
+        printMessage("My mood: " + mood);
         printMessage("Going home");
     }
 
