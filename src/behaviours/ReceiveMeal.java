@@ -50,13 +50,12 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
         notification.setContent("" + tip);
 
         customer.printMessage("Here's your tip: " + tip + "€.");
-        //done = true;
-        //customer.doDelete();
+        done = true;
         return notification;
     }
 
-    @Override
-    public boolean done() {
+    public boolean isDone() {
         return done;
     }
+
 }
