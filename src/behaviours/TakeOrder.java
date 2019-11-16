@@ -124,7 +124,7 @@ public class TakeOrder extends CyclicBehaviour{
             myWaiter.getKnownDish(dishInfo[0]).setAvailability(Integer.parseInt(dishInfo[1]));
             myWaiter.printMessage("Your meal is being prepared.");
             myWaiter.sendMessage(customerID, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                    "order-request", "ok");
+                    "order-request", dishInfo[2] + " - " + dishInfo[3]);
             myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000, customerID, dishInfo[0]));
             step = 0;
         }
