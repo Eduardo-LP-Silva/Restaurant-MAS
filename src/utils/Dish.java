@@ -25,6 +25,10 @@ public class Dish {
             return false;
     }
 
+    public boolean compareStaticDetails(String dishName, int ct, int prep) {
+        return dishName.equals(name) && ct == cookingTime && prep == preparation;
+    }
+
     public void setAvailability(int availability) {
         this.availability = availability;
     }

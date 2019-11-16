@@ -141,14 +141,15 @@ public class Waiter extends RestaurantAgent
         int dishIndex = getKnownDishIndex(dishName);
 
         if(dishIndex == -1) {
+            printMessage("I don't know about that one, try someone else...");
             sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "dish-details", dishName);
-            printMessage("I don't know about that one, try someone else...");
         }
         else {
             Dish requestedDish = knownDishes.get(dishIndex);
             Random rand = new Random();
             String dishDetails = dishName + " ";
+            String messageToPrint = "";
 
             //75% chance of lying
             if(!trustworthy && rand.nextInt(99) + 1 <= 75) {
@@ -159,12 +160,15 @@ public class Waiter extends RestaurantAgent
 
                 dishDetails += " " + rand.nextInt(requestedDish.getCookingTime() * 2) + " "
                         + rand.nextInt(requestedDish.getPreparation());
+                messageToPrint = "*Lies* ";
             }
             else
                 dishDetails += requestedDish.getAvailability() + " " + requestedDish.getCookingTime() + " "
                         + requestedDish.getPreparation();
 
-            printMessage("Yes, here you go");
+            messageToPrint += "Yes, here you go: " + dishDetails;
+
+            printMessage(messageToPrint);
             sendMessage(otherWaiter, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "dish-details", dishDetails);
         }
@@ -271,6 +275,11 @@ public class Waiter extends RestaurantAgent
     }
 
     public Dish getKnownDish(String dishName) {
-        return knownDishes.get(getKnownDishIndex(dishName));
+        int index = getKnownDishIndex(dishName);
+
+        if(index != -1)
+            return knownDishes.get(index);
+        else
+            return null;
     }
 }
