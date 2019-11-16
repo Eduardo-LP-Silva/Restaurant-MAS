@@ -89,12 +89,25 @@ public class Customer extends RestaurantAgent {
     }
 
     private AID getCurrentWaiter() {
+        Random random = new Random();
+        int index = random.nextInt(waiters.size());
+
+        boolean allWaitersUnavailable = true;
+
         for (AID aid : waiters) {
-            if (!unavailableWaiters.contains(aid)) {
-                return aid;
+            if(!unavailableWaiters.contains(aid)) {
+                allWaitersUnavailable = false;
             }
         }
-        return null;
+
+        if(allWaitersUnavailable) {
+            return null;
+        }
+
+        while (unavailableWaiters.contains(waiters.get(index))) {
+            index = random.nextInt(waiters.size());
+        }
+        return waiters.get(index);
     }
 
     // Step 0: Find an available waiter (corresponds to waiter's step 0)
