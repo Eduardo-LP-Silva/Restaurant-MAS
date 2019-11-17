@@ -8,13 +8,14 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.text.DecimalFormat;
+
 public class ServeMeal extends WakerBehaviour {
     
     private static final long serialVersionUID = -1854723296124682854L;
     private AID customer;
     private Waiter myWaiter;
     private String dish;
-    private int step = 0;
 
     ServeMeal(Agent a, long timeout, AID customer, String dish) {
         super(a, timeout);
@@ -26,54 +27,50 @@ public class ServeMeal extends WakerBehaviour {
 
     @Override
     public void onWake() {
-        switch(step) {
-            case 0:
-                myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
-                        "meal-delivering", dish);
-                myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
-                step = 1;
-                getCustomerFeedback();
-                break;
-
-            case 1:
-                getCustomerFeedback();
-                break;
-
-            case 2:
-                receiveTip();
-                break;
-        }
-
+        myWaiter.printMessage("A dose of " + dish + ", just like you ordered, " + customer.getLocalName() + ".");
+        myWaiter.sendMessage(customer, ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                "meal-delivering", dish);
+        getCustomerFeedback();
     }
 
-    private void receiveTip() {
-        MessageTemplate template = MessageTemplate.MatchConversationId("tip");
-        ACLMessage msg = myWaiter.receive(template);
+    private void receiveTip(ACLMessage msg) {
+        myWaiter.addTip(Double.parseDouble(msg.getContent()));
+        myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
 
-        if(msg == null) {
-            block();
-            reset();
-        }
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
 
-        if(msg.getPerformative() == ACLMessage.INFORM) {
-            myWaiter.addTip(Integer.parseInt(msg.getContent()));
-            myWaiter.printMessage("Thank you very much " + customer.getLocalName() + "for the " + msg.getContent() + "€!");
-            myWaiter.removeCustomer();
-        }
+        String totalTips = df.format(myWaiter.getTips());
 
-        myWaiter.printMessage("I have collected " + myWaiter.getTips() + "€ in tips so far!");
+        myWaiter.printMessage("I have collected " + totalTips + "€ in tips so far!");
     }
 
     private void getCustomerFeedback() {
-        MessageTemplate template = MessageTemplate.MatchConversationId("meal-delivering");
-        ACLMessage msg = myWaiter.receive(template);
+        MessageTemplate template = MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"),
+                MessageTemplate.MatchPerformative(ACLMessage.AGREE));
+        ACLMessage msg;
 
-        if(msg == null) {
-            block();
-            reset();
+        do {
+            msg = myWaiter.receive(template);
+
+            if(msg == null)
+                block();
         }
+        while(msg == null);
 
-        step = 2;
-        receiveTip();
+        ACLMessage secondMessage;
+        MessageTemplate secondTemplate =  MessageTemplate.and(MessageTemplate.MatchConversationId("meal-delivering"),
+                MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+
+        do {
+            secondMessage = myWaiter.receive(secondTemplate);
+
+            if(secondMessage == null)
+                block();
+        }
+        while(secondMessage == null);
+
+        receiveTip(secondMessage);
     }
+
 }

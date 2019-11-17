@@ -7,6 +7,8 @@ import jade.lang.acl.ACLMessage;
 public abstract class RestaurantAgent extends Agent {
     protected String role;
 
+    public abstract void addWaiters(AID[] newWaiters);
+
     public void sendMessage(AID aid, int performative, String protocol , String conversationID, String content) {
         ACLMessage msg = new ACLMessage(performative);
         msg.addReceiver(aid);
@@ -18,6 +20,6 @@ public abstract class RestaurantAgent extends Agent {
     }
 
     public void printMessage(String message) {
-        System.out.println("( " + role + " " + getAID().getLocalName() + ") " + message);
+        System.out.println("(" + role + " " + getAID().getLocalName() + ") " + message);
     }
 }

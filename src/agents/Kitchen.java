@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import behaviours.TakeRequest;
+import jade.core.AID;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -13,7 +14,7 @@ public class Kitchen extends RestaurantAgent
 {
     private static final long serialVersionUID = 1L;
     private HashMap<String, int[]> meals; //<Dish, <Availability, CookingTime, WellPreparedProbability>>
-    private String[] dishes;
+    private static String[] dishes;
 
     protected void setup() {
         role = "Kitchen";
@@ -51,7 +52,7 @@ public class Kitchen extends RestaurantAgent
             "francesinha",
             "lamb",
             "vegan burger",
-            "omelette"
+            "omelet"
         };
 
         this.generateMeals();
@@ -62,14 +63,22 @@ public class Kitchen extends RestaurantAgent
         this.addBehaviour(new TakeRequest(this));
     }
 
+    public static String[] getMenu() {
+        return dishes;
+    }
+
+    public HashMap<String, int[]> getMeals() {
+        return meals;
+    }
+
     private void generateMeals() {
         Random rand = new Random();
-        Integer cookingTime, wellPreparedProb, availability;
+        int cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
-            cookingTime = rand.nextInt(85) + 5;
+            cookingTime = rand.nextInt(9) + 1;
             wellPreparedProb = rand.nextInt(9) + 1;
-            availability = rand.nextInt(3) + 1;
+            availability = rand.nextInt(4) + 1;
             meals.put(dishes[i], new int[] {availability, cookingTime, wellPreparedProb});
         }
     }
@@ -82,12 +91,6 @@ public class Kitchen extends RestaurantAgent
         return meals.get(dish);
     }
 
-    public String selectRandomMeal() {
-        Random rand = new Random();
-
-        return dishes[rand.nextInt(dishes.length)];
-    }
-
     protected void takeDown() {
         try {
             DFService.deregister(this);
@@ -97,5 +100,10 @@ public class Kitchen extends RestaurantAgent
         }
 
         System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " shutting down.");
+    }
+
+    @Override
+    public void addWaiters(AID[] newWaiters) {
+        //Empty function
     }
 }

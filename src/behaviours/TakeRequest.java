@@ -19,20 +19,34 @@ public class TakeRequest extends CyclicBehaviour{
         ACLMessage request = myKitchen.receive();
 
         if(request != null) {
-            String convId = request.getConversationId();
             ACLMessage reply = request.createReply();
             String meal = request.getContent();
-            String mealString = "";
+            String mealString;
+
+            reply.setConversationId(request.getConversationId());
+            reply.setPerformative(ACLMessage.AGREE);
+            reply.setContent("ok");
+            myKitchen.send(reply);
 
             if(myKitchen.checkMeal(meal)) {
                 int[] mealInfo = myKitchen.getMealInfo(meal);
-                mealString = meal + " " + mealInfo[0] + " " + mealInfo[1];
-                if(convId.equals("dish-details"))
-                    mealString += " " + mealInfo[2];
+
+                if(request.getConversationId().equals("start-dish")) {
+                    mealInfo[0]--;
+                    myKitchen.getMeals().put(meal, mealInfo);
+                }
+
+                mealString = meal + " - " + mealInfo[0] + " - " + mealInfo[1] + " - " + mealInfo[2];
+
                 reply.setContent(mealString);
+                reply.setPerformative(ACLMessage.INFORM);
+                myKitchen.printMessage("Here you go: " + mealString);
             } else {
-                reply.setContent("not-found");
+                reply.setContent(meal);
+                reply.setPerformative(ACLMessage.FAILURE);
+                myKitchen.printMessage("We don't do that here...");
             }
+
             myKitchen.send(reply);
         }
         else

@@ -13,6 +13,17 @@ public class Pair<T, U> implements Serializable {
         this.right = right;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if(o instanceof Pair) {
+            Pair p = (Pair) o;
+
+            return p.getKey().equals(this.left) && p.getValue().equals(this.right);
+        }
+        else
+            return false;
+    }
+
     public T getKey() {
         return left;
     }

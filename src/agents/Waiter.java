@@ -1,9 +1,12 @@
 package agents;
 
 import java.util.ArrayList;
-import behaviours.TakeOrder;
+import java.util.Random;
+
+import behaviours.AttendCustomer;
+import behaviours.ReplyToWaiter;
+import behaviours.ServiceSearch;
 import jade.core.AID;
-import jade.core.Agent;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -11,19 +14,31 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import utils.Dish;
+import utils.Pair;
 
 public class Waiter extends RestaurantAgent
 {
     private static final long serialVersionUID = 7110642579660810600L;
-    private static final int MAX_CLIENT_NO = 3;
     private AID kitchen;
-    private ArrayList<String> waiters = new ArrayList<>();
     private ArrayList<Dish> knownDishes = new ArrayList<>();
-    private int noCustomers = 0;
-    private int tips = 0;
+    private ArrayList<Pair<AID, Boolean>> waiters = new ArrayList<>();
+    private AID customerID;
+    private double tips = 0;
+    private boolean trustworthy;
+    private int waiterIndex = 0;
 
     protected void setup() {
         role = "Waiter";
+
+        Object[] args = getArguments();
+
+        if(args.length != 1) {
+            System.out.println("Usage: Waiter <trustworthy>");
+            doDelete();
+            return;
+        }
+
+        trustworthy = Boolean.parseBoolean((String) args[0]);
 
         DFAgentDescription dfd = new DFAgentDescription();
         ServiceDescription sd = new ServiceDescription();
@@ -45,7 +60,9 @@ public class Waiter extends RestaurantAgent
         if(!searchForKitchen())
             this.doDelete();
 
-        this.addBehaviour(new TakeOrder(this));
+        this.addBehaviour(new ServiceSearch(this, 500));
+        this.addBehaviour(new AttendCustomer(this));
+        this.addBehaviour(new ReplyToWaiter(this));
     }
 
     private boolean searchForKitchen() {
@@ -95,49 +112,154 @@ public class Waiter extends RestaurantAgent
      */
     public void updateKnownDish(Dish newDish) {
         int dishIndex = knownDishes.indexOf(newDish);
+        Dish knownDish = knownDishes.get(dishIndex);
         
-        if(newDish.isReliable())
+        if(isDishInfoReliable(newDish) || !isDishInfoReliable(knownDish))
             knownDishes.set(dishIndex, newDish);
         else {
-            Dish knownDish = knownDishes.get(dishIndex);
-
-            if(knownDish.isReliable() && newDish.getAvailability() < knownDish.getAvailability())
-                knownDish.setAvailability(newDish.getAvailability());
-            else
-                knownDishes.set(dishIndex, newDish); 
+                if(newDish.getAvailability() < knownDish.getAvailability())
+                    knownDish.setAvailability(newDish.getAvailability());
         }    
+    }
+
+    public boolean isDishInfoReliable(Dish dish) {
+        return dish.getInfoSrc().equals(kitchen);
     }
 
     public Dish suggestOtherDish(Dish originalDish, int customerMood) {
 
+        for (Dish knownDish : knownDishes)
+            if (customerMood - knownDish.getCookingTime() - 5 >= 3
+                    && customerMood + knownDish.getPreparation() - 5 >= 3
+                    && !knownDish.getName().equals(originalDish.getName()))
+                return knownDish;
+
         return null;
     }
 
-    public void addCustomer() {
-        noCustomers++;
+    public void informAboutDish(AID otherWaiter, String dishName) {
+        Random rand = new Random();
+        int lie = rand.nextInt(99) + 1;
+        int dishIndex = getKnownDishIndex(dishName);
+
+        //75% chance of lying
+        if((dishIndex == -1 && trustworthy) || (!trustworthy && lie > 75)) {
+            printMessage("I don't know about that one, try someone else...");
+            sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    "dish-details", dishName);
+        }
+        else {
+            Dish requestedDish = null;
+
+            if(dishIndex != -1)
+                requestedDish = knownDishes.get(dishIndex);
+
+            String dishDetails = dishName + " - ";
+            String messageToPrint = "";
+
+            if(!trustworthy) {
+                if(requestedDish == null || requestedDish.getAvailability() == 0)
+                    dishDetails += rand.nextInt(5) + 1; //To make the other waiter look bad when he finds out it's 0
+                else
+                    dishDetails += rand.nextInt(requestedDish.getAvailability());
+
+                dishDetails += " - " + (rand.nextInt(6) + 5) + " - "
+                        + rand.nextInt(rand.nextInt(5) + 1);
+                messageToPrint = "*Lies* ";
+            }
+            else
+                dishDetails += requestedDish.getAvailability() + " - " + requestedDish.getCookingTime() + " - "
+                        + requestedDish.getPreparation();
+
+            messageToPrint += "Yes, here you go: " + dishDetails;
+
+            printMessage(messageToPrint);
+            sendMessage(otherWaiter, ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
+                    "dish-details", dishDetails);
+        }
+
     }
 
-    public void addTip(int tip) {
+    @Override
+    public void addWaiters(AID[] newWaiters) {
+        boolean found;
+
+        for(AID newWaiter : newWaiters) {
+            found = false;
+
+            if(newWaiter.equals(this.getAID()))
+                continue;
+
+            for(Pair<AID, Boolean> waiter : waiters)
+                if(waiter.getKey().equals(newWaiter)) {
+                    found = true;
+                    break;
+                }
+
+            if(!found)
+                waiters.add(new Pair<>(newWaiter, true));
+        }
+    }
+
+    public void resetWaiterIndex() {
+        for(int i = 0; i < waiters.size(); i++)
+            if(waiters.get(i).getValue()) {
+                waiterIndex = i;
+                return;
+            }
+    }
+
+    public AID getNextReliableWaiter() {
+        Pair<AID, Boolean> waiter;
+
+        if(waiters.size() == 0 || waiterIndex >= waiters.size())
+            return null;
+
+        do {
+            waiter = waiters.get(waiterIndex);
+            waiterIndex++;
+        }
+        while(!waiter.getValue() && waiterIndex < waiters.size());
+
+        if(!waiter.getValue())
+            return null;
+        else
+            return waiter.getKey();
+    }
+
+    public void addTip(double tip) {
         tips += tip;
     }
 
-    public void removeCustomer() {
-        noCustomers--;
-    }
-
     public boolean isBusy() {
-        return noCustomers >= MAX_CLIENT_NO;
+        return customerID != null;
     }
 
     public AID getKitchen() {
         return kitchen;
     }
 
+    public AID getCustomerID() {
+        return customerID;
+    }
+
+    public ArrayList<Pair<AID, Boolean>> getWaiters() {
+        return waiters;
+    }
+
+    public Pair<AID, Boolean> getWaiter(AID waiter) {
+        for(Pair<AID, Boolean> knownWaiter : waiters)
+            if(knownWaiter.getKey().equals(waiter))
+                return knownWaiter;
+
+        return null;
+    }
+
     public ArrayList<Dish> getKnownDishes() {
         return knownDishes;
     }
 
-    public int getTips() {
+    public double getTips() {
         return tips;
     }
 
@@ -147,5 +269,18 @@ public class Waiter extends RestaurantAgent
                 return i;
 
         return -1;
+    }
+
+    public Dish getKnownDish(String dishName) {
+        int index = getKnownDishIndex(dishName);
+
+        if(index != -1)
+            return knownDishes.get(index);
+        else
+            return null;
+    }
+
+    public void setCustomerID(AID cid) {
+        customerID = cid;
     }
 }
