@@ -67,6 +67,10 @@ public class Kitchen extends RestaurantAgent
         return dishes;
     }
 
+    public HashMap<String, int[]> getMeals() {
+        return meals;
+    }
+
     private void generateMeals() {
         Random rand = new Random();
         int cookingTime, wellPreparedProb, availability;

@@ -30,6 +30,12 @@ public class TakeRequest extends CyclicBehaviour{
 
             if(myKitchen.checkMeal(meal)) {
                 int[] mealInfo = myKitchen.getMealInfo(meal);
+
+                if(request.getConversationId().equals("start-dish")) {
+                    mealInfo[0]--;
+                    myKitchen.getMeals().put(meal, mealInfo);
+                }
+
                 mealString = meal + " - " + mealInfo[0] + " - " + mealInfo[1] + " - " + mealInfo[2];
 
                 reply.setContent(mealString);
