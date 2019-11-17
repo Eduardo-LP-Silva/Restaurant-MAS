@@ -69,7 +69,7 @@ public class Kitchen extends RestaurantAgent
 
     private void generateMeals() {
         Random rand = new Random();
-        Integer cookingTime, wellPreparedProb, availability;
+        int cookingTime, wellPreparedProb, availability;
 
         for(int i = 0; i < dishes.length; i++) {
             cookingTime = rand.nextInt(9) + 1;
@@ -85,12 +85,6 @@ public class Kitchen extends RestaurantAgent
 
     public int[] getMealInfo(String dish) {
         return meals.get(dish);
-    }
-
-    private String selectRandomMeal() {
-        Random rand = new Random();
-
-        return dishes[rand.nextInt(dishes.length)];
     }
 
     protected void takeDown() {

@@ -6,7 +6,6 @@ import java.util.Random;
 import behaviours.AttendCustomer;
 import behaviours.ReplyToWaiter;
 import behaviours.ServiceSearch;
-import behaviours.TakeOrder;
 import jade.core.AID;
 import jade.domain.DFService;
 import jade.domain.FIPAException;
@@ -63,7 +62,6 @@ public class Waiter extends RestaurantAgent
 
         this.addBehaviour(new ServiceSearch(this, 500));
         this.addBehaviour(new AttendCustomer(this));
-        this.addBehaviour(new TakeOrder(this));
         this.addBehaviour(new ReplyToWaiter(this));
     }
 
@@ -130,10 +128,11 @@ public class Waiter extends RestaurantAgent
 
     public Dish suggestOtherDish(Dish originalDish, int customerMood) {
 
-        for(int i = 0; i < knownDishes.size(); i++)
-            if(customerMood - knownDishes.get(i).getCookingTime() - 5 >= 3
-                    && customerMood + knownDishes.get(i).getPreparation() - 5 >= 3)
-                return knownDishes.get(i);
+        for (Dish knownDish : knownDishes)
+            if (customerMood - knownDish.getCookingTime() - 5 >= 3
+                    && customerMood + knownDish.getPreparation() - 5 >= 3
+                    && !knownDish.getName().equals(originalDish.getName()))
+                return knownDish;
 
         return null;
     }
@@ -143,6 +142,7 @@ public class Waiter extends RestaurantAgent
         int lie = rand.nextInt(99) + 1;
         int dishIndex = getKnownDishIndex(dishName);
 
+        //75% chance of lying
         if((dishIndex == -1 && trustworthy) || (!trustworthy && lie > 75)) {
             printMessage("I don't know about that one, try someone else...");
             sendMessage(otherWaiter, ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_REQUEST,
@@ -157,8 +157,7 @@ public class Waiter extends RestaurantAgent
             String dishDetails = dishName + " - ";
             String messageToPrint = "";
 
-            //75% chance of lying
-            if(!trustworthy &&  lie <= 75) {
+            if(!trustworthy) {
                 if(requestedDish == null || requestedDish.getAvailability() == 0)
                     dishDetails += rand.nextInt(5) + 1; //To make the other waiter look bad when he finds out it's 0
                 else
@@ -242,10 +241,6 @@ public class Waiter extends RestaurantAgent
 
     public AID getCustomerID() {
         return customerID;
-    }
-
-    public int getWaiterIndex() {
-        return waiterIndex;
     }
 
     public ArrayList<Pair<AID, Boolean>> getWaiters() {

@@ -33,6 +33,18 @@ public class Dish {
         this.availability = availability;
     }
 
+    public void setCookingTime(int cookingTime) {
+        this.cookingTime = cookingTime;
+    }
+
+    public void setPreparation(int preparation) {
+        this.preparation = preparation;
+    }
+
+    public void setInfoSrc(AID infoSrc) {
+        this.infoSrc = infoSrc;
+    }
+
     public void decrementAvailability() {
         availability--;
     }

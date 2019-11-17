@@ -21,7 +21,7 @@ public class TakeRequest extends CyclicBehaviour{
         if(request != null) {
             ACLMessage reply = request.createReply();
             String meal = request.getContent();
-            String mealString = "";
+            String mealString;
 
             reply.setConversationId(request.getConversationId());
             reply.setPerformative(ACLMessage.AGREE);

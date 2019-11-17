@@ -12,7 +12,6 @@ public class ReplyToWaiter extends CyclicBehaviour {
     private static final long serialVersionUID = -7489339939177286595L;
 
     private Waiter myWaiter;
-    private int step = 0;
 
     public ReplyToWaiter(Waiter waiter) {
         myWaiter = waiter;

@@ -4,8 +4,6 @@ import jade.core.AID;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 
-import java.util.ArrayList;
-
 public abstract class RestaurantAgent extends Agent {
     protected String role;
 

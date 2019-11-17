@@ -36,6 +36,7 @@ public class AttendCustomer extends CyclicBehaviour {
             myWaiter.printMessage("I'll gladly be your waiter this evening, " + msg.getSender().getLocalName() + ".");
             myWaiter.sendMessage(msg.getSender(), ACLMessage.AGREE, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     msg.getConversationId(), "ok");
+            myWaiter.addBehaviour(new TakeOrder(myWaiter));
             myWaiter.printMessage("Go ahead, what can I get you?");
             myWaiter.sendMessage(msg.getSender(), ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     msg.getConversationId(), "proceed");

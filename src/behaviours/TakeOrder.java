@@ -2,19 +2,20 @@ package behaviours;
 
 import agents.Waiter;
 import jade.core.AID;
-import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import utils.Dish;
 import utils.Pair;
 
-public class TakeOrder extends CyclicBehaviour{
+public class TakeOrder extends SimpleBehaviour {
     
     private static final long serialVersionUID = 7818256748738825651L;
     private int step = 1;
     private int customerMood;
     private Waiter myWaiter;
+    private int refuseProposalCounter = 0;
 
     public TakeOrder(Waiter waiter) {
         myWaiter = waiter;
@@ -87,6 +88,11 @@ public class TakeOrder extends CyclicBehaviour{
         }
     }
 
+    @Override
+    public boolean done() {
+        return step == 6 || refuseProposalCounter >= 3;
+    }
+
     private void getKitchenFinalCheck(ACLMessage msg) {
         String[] dishInfo = msg.getContent().split(" - ");
         Dish dish = myWaiter.getKnownDish(dishInfo[0]);
@@ -102,22 +108,28 @@ public class TakeOrder extends CyclicBehaviour{
 
         }
 
+        if(dish != null) {
+            dish.setAvailability(Integer.parseInt(dishInfo[1]));
+            dish.setCookingTime(Integer.parseInt(dishInfo[2]));
+            dish.setPreparation(Integer.parseInt(dishInfo[3]));
+            dish.setInfoSrc(myWaiter.getKitchen());
+        }
+
+
         if(msg.getPerformative() == ACLMessage.REFUSE) {
-            myWaiter.getKnownDish(msg.getContent()).setAvailability(0);
             myWaiter.printMessage("I'm sorry, but there's been a mistake. We're out of " + dishInfo[0] + ".");
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", "unavailable");
             step = 1;
         }
         else {
-            myWaiter.getKnownDish(dishInfo[0]).setAvailability(Integer.parseInt(dishInfo[1]));
             myWaiter.printMessage("Your meal is being prepared.");
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", dishInfo[2] + " - " + dishInfo[3]);
             myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000,
                     myWaiter.getCustomerID(), dishInfo[0]));
             myWaiter.setCustomerID(null);
-            step = 1;
+            step = 6;
         }
     }
 
@@ -133,8 +145,11 @@ public class TakeOrder extends CyclicBehaviour{
                     "start-dish", dish.getName());
             step = 5;
         }
-        else
+        else {
             step = 1;
+            refuseProposalCounter++;
+        }
+
     }
 
     private void evaluateDish(Dish dish, String infoSource) {

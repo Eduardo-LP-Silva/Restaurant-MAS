@@ -8,6 +8,8 @@ import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.text.DecimalFormat;
+
 public class ServeMeal extends WakerBehaviour {
     
     private static final long serialVersionUID = -1854723296124682854L;
@@ -35,7 +37,12 @@ public class ServeMeal extends WakerBehaviour {
         myWaiter.addTip(Double.parseDouble(msg.getContent()));
         myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
 
-        myWaiter.printMessage("I have collected " + myWaiter.getTips() + "€ in tips so far!");
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+
+        String totalTips = df.format(myWaiter.getTips());
+
+        myWaiter.printMessage("I have collected " + totalTips + "€ in tips so far!");
     }
 
     private void getCustomerFeedback() {
