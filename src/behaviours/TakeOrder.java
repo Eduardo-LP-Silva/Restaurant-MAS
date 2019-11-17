@@ -41,7 +41,9 @@ public class TakeOrder extends SimpleBehaviour {
 
             case 2:
                 //Get dish details from another agent
-                template = MessageTemplate.MatchConversationId("dish-details");
+                template = MessageTemplate.and(MessageTemplate.MatchConversationId("dish-details"),
+                        MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.FAILURE),
+                                MessageTemplate.MatchPerformative(ACLMessage.INFORM)));
                 msg = myWaiter.receive(template);
 
                 if(msg != null) 
@@ -75,8 +77,9 @@ public class TakeOrder extends SimpleBehaviour {
                 break;
 
             case 5:
-                template = MessageTemplate.or(MessageTemplate.MatchConversationId("dish-details"),
-                        MessageTemplate.MatchConversationId("start-dish"));
+                template = MessageTemplate.and(
+                        MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.AGREE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE)),
+                        MessageTemplate.or(MessageTemplate.MatchConversationId("dish-details"), MessageTemplate.MatchConversationId("start-dish")));
 
                 msg = myWaiter.receive(template);
 
@@ -115,21 +118,20 @@ public class TakeOrder extends SimpleBehaviour {
             dish.setInfoSrc(myWaiter.getKitchen());
         }
 
-
         if(msg.getPerformative() == ACLMessage.REFUSE) {
+            step = 1;
             myWaiter.printMessage("I'm sorry, but there's been a mistake. We're out of " + dishInfo[0] + ".");
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.FAILURE, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", "unavailable");
-            step = 1;
         }
         else {
+            step = 6;
             myWaiter.printMessage("Your meal is being prepared.");
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", dishInfo[2] + " - " + dishInfo[3]);
             myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000,
                     myWaiter.getCustomerID(), dishInfo[0]));
             myWaiter.setCustomerID(null);
-            step = 6;
         }
     }
 
@@ -139,11 +141,11 @@ public class TakeOrder extends SimpleBehaviour {
         if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL
                 || (msgDetails.length > 1 && msgDetails[1].equals("original"))) {
             Dish dish =  myWaiter.getKnownDish(msgDetails[0]);
+            step = 5;
             dish.decrementAvailability();
             myWaiter.printMessage("Right away!");
             myWaiter.sendMessage(myWaiter.getKitchen(), ACLMessage.REQUEST, FIPANames.InteractionProtocol.FIPA_REQUEST,
                     "start-dish", dish.getName());
-            step = 5;
         }
         else {
             step = 1;
@@ -157,10 +159,10 @@ public class TakeOrder extends SimpleBehaviour {
         Dish suggestion;
 
         if(dish.getAvailability() == 0) {
+            step = 1;
             myWaiter.printMessage("I'm sorry, it seems that we're all out of " + dish.getName() + ".");
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.REFUSE,
                     FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "order-request", "unavailable");
-            step = 1;
         } 
         else
             if((customerMood - dish.getCookingTime() - 5 <= 3 || customerMood + dish.getPreparation() - 5 <= 3)
@@ -168,18 +170,18 @@ public class TakeOrder extends SimpleBehaviour {
 
                 //String suggestionInfoSrc = suggestion.isReliable() ? "kitchen" : "waiter";
 
+                step = 3;
                 myWaiter.printMessage("How about " + suggestion.getName() + "?");
                 myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.PROPOSE,
                         FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "order-request",
                         suggestion.getName() + " - " + infoSource);
-                step = 3;
             }
             else {
+                step = 3;
                 myWaiter.printMessage("Excellent choice!");
                 myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.PROPOSE,
                         FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "order-request",
                         dish.getName() + " - " + infoSource);
-                step = 3;
             }
     }
 
@@ -201,9 +203,9 @@ public class TakeOrder extends SimpleBehaviour {
                 else
                     myWaiter.printMessage("Okay... How about you " +  nextAgent.getLocalName() + "?");
 
+                step = 5;
                 myWaiter.sendMessage(nextAgent, ACLMessage.REQUEST,
                         FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
-                step = 5;
             }
             else
                 System.out.println("Error: Kitchen refused request");
@@ -215,14 +217,15 @@ public class TakeOrder extends SimpleBehaviour {
 
         if(msg.getPerformative() == ACLMessage.FAILURE) {
             if(msg.getSender().equals(myWaiter.getKitchen())) {
+                step = 1;
                 myWaiter.printMessage("I'm afraid we don't serve that dish in here. Try another one.");
                 myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.REFUSE,
                         FIPANames.InteractionProtocol.FIPA_CONTRACT_NET, "order-request", "not-found");
-                step = 1;
                 return;
             }
             else {
                 AID nextAgent = myWaiter.getNextReliableWaiter();
+                step = 5;
 
                 if(nextAgent == null) {
                     myWaiter.printMessage("It seems I'll have to ask the kitchen staff after all...");
@@ -236,13 +239,16 @@ public class TakeOrder extends SimpleBehaviour {
                             FIPANames.InteractionProtocol.FIPA_REQUEST, "dish-details", msg.getContent());
                 }
 
-                step = 5;
                 return;
             }
         }
 
         String[] dishDetails = content.split(" - "); //Message format: "dish - availability - cookingTime - preparationRate"
-        Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), 
+
+        if(dishDetails.length < 4)
+            System.out.println(msg.getSender().getLocalName() + " | " + msg.getPerformative() + " | " + content);
+
+        Dish dish = new Dish(dishDetails[0], Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]),
             Integer.parseInt(dishDetails[3]), msg.getSender());
         String infoSrc;
             
