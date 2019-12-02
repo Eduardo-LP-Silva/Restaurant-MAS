@@ -35,6 +35,12 @@ public class Customer extends RestaurantAgent {
         attempts = 0;
         desiredDish = "";
 
+        Object[] args = getArguments();
+
+        if(args.length > 0)
+            desiredDish = (String) args[0];
+
+
         serviceSearch = new ServiceSearch(this, 1000);
         addBehaviour(serviceSearch);
     }
@@ -146,6 +152,10 @@ public class Customer extends RestaurantAgent {
     }
 
     private void decideDish() {
+
+        if(desiredDish != null)
+            return;
+        
         String oldDish = desiredDish;
         String[] dishes = Kitchen.getMenu();
         Random rand = new Random();

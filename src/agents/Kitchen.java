@@ -34,7 +34,7 @@ public class Kitchen extends RestaurantAgent
             e.printStackTrace();
         }
 
-        meals = new HashMap<String, int[]>();
+        meals = new HashMap<>();
         dishes = new String[] {
             "onion soup",
             "escargots",
@@ -55,7 +55,12 @@ public class Kitchen extends RestaurantAgent
             "omelet"
         };
 
-        this.generateMeals();
+        Object[] args = getArguments();
+
+        if(args.length > 0)
+            setMeals(args);
+        else
+            this.generateMeals();
         
         System.out.println("(kitchen) Kitchen " + this.getAID().getLocalName() + " at your service.");
         
@@ -69,6 +74,13 @@ public class Kitchen extends RestaurantAgent
 
     public HashMap<String, int[]> getMeals() {
         return meals;
+    }
+
+    private void setMeals(Object[] newMeals) {
+        for (Object newMeal : newMeals) {
+            String[] dishDetails = ((String) newMeal).split("-");
+            meals.put(dishDetails[0], new int[]{Integer.parseInt(dishDetails[1]), Integer.parseInt(dishDetails[2]), Integer.parseInt(dishDetails[3])});
+        }
     }
 
     private void generateMeals() {
