@@ -155,7 +155,7 @@ public class Customer extends RestaurantAgent {
 
         if(desiredDish != null)
             return;
-        
+
         String oldDish = desiredDish;
         String[] dishes = Kitchen.getMenu();
         Random rand = new Random();
