@@ -7,7 +7,10 @@ import jade.core.behaviours.WakerBehaviour;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import utils.RecordWriter;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 
 public class ServeMeal extends WakerBehaviour {
@@ -16,13 +19,19 @@ public class ServeMeal extends WakerBehaviour {
     private AID customer;
     private Waiter myWaiter;
     private String dish;
+    private int dishAvailability;
+    private int dishCookingTime;
+    private int dishQuality;
 
-    ServeMeal(Agent a, long timeout, AID customer, String dish) {
+    ServeMeal(Agent a, long timeout, AID customer, String[] dish) {
         super(a, timeout);
 
         myWaiter = (Waiter) a;
         this.customer = customer;
-        this.dish = dish;
+        this.dish = dish[0];
+        dishAvailability = Integer.parseInt(dish[1]);
+        dishCookingTime = Integer.parseInt(dish[2]);
+        dishQuality = Integer.parseInt(dish[3]);
     }
 
     @Override
@@ -33,9 +42,26 @@ public class ServeMeal extends WakerBehaviour {
         getCustomerFeedback();
     }
 
+    private void recordData(int initialMood, int finalMood, double tip) {
+        RecordWriter.writeHeaders();
+        RecordWriter.write(customer.getLocalName() + ","
+                    + myWaiter.getLocalName() + ","
+                    + myWaiter.getTrustworthy() + ","
+                    + initialMood + ","
+                    + finalMood + ","
+                    + dishAvailability + ","
+                    + dishCookingTime + ","
+                    + dishQuality + ","
+                    + tip + "\n");
+    }
+
     private void receiveTip(ACLMessage msg) {
-        myWaiter.addTip(Double.parseDouble(msg.getContent()));
-        myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + msg.getContent() + "€!");
+        String[] contents = msg.getContent().split("-");
+        double tip = Double.parseDouble(contents[0]);
+        int initialMood = Integer.parseInt(contents[1]);
+        int finalMood = Integer.parseInt(contents[2]);
+        myWaiter.addTip(tip);
+        myWaiter.printMessage("Thank you very much " + customer.getLocalName() + " for the " + tip + "€!");
 
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
@@ -43,6 +69,7 @@ public class ServeMeal extends WakerBehaviour {
         String totalTips = df.format(myWaiter.getTips());
 
         myWaiter.printMessage("I have collected " + totalTips + "€ in tips so far!");
+        recordData(initialMood, finalMood, tip);
     }
 
     private void getCustomerFeedback() {

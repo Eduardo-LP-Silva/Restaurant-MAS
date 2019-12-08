@@ -57,7 +57,7 @@ public class Kitchen extends RestaurantAgent
 
         Object[] args = getArguments();
 
-        if(args.length > 0)
+        if(args != null)
             setMeals(args);
         else
             this.generateMeals();

@@ -48,7 +48,7 @@ public class ReceiveMeal extends SimpleAchieveREResponder {
         ACLMessage notification = request.createReply();
         notification.setPerformative(ACLMessage.INFORM);
         notification.setConversationId("meal-delivering");
-        notification.setContent("" + tip);
+        notification.setContent(tip + "-" + customer.getInitialMood() + "-" + customer.getMood());
 
         customer.printMessage("Here's your tip: " + tip + "€.");
 
