@@ -43,10 +43,14 @@ public class ServeMeal extends WakerBehaviour {
     }
 
     private void recordData(int initialMood, int finalMood, double tip) {
-        RecordWriter.writeHeaders();
-        RecordWriter.write(customer.getLocalName() + ","
-                    + myWaiter.getLocalName() + ","
-                    + myWaiter.getTrustworthy() + ","
+        RecordWriter.writeHeaders("tip_records.csv", "Liar," +
+                "Initial Mood," +
+                "Final Mood," +
+                "Dish Availability," +
+                "Dish Cooking Time," +
+                "Dish Quality," +
+                "Tip\n");
+        RecordWriter.write("tip_records.csv", myWaiter.getTrustworthy() + ","
                     + initialMood + ","
                     + finalMood + ","
                     + dishAvailability + ","
