@@ -12,6 +12,7 @@ import jade.proto.SimpleAchieveREInitiator;
 public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
+    private boolean hasDishArgument;
     private HashSet<AID> unavailableWaiters = new HashSet<>();
     private boolean hasWaiter;
     private AID waiter;
@@ -36,12 +37,14 @@ public class Customer extends RestaurantAgent {
         hasWaiter = false;
         attempts = 0;
         desiredDish = "";
+        hasDishArgument = false;
 
         Object[] args = getArguments();
 
-        if(args != null)
+        if(args != null) {
             desiredDish = (String) args[0];
-
+            hasDishArgument = true;
+        }
 
         serviceSearch = new ServiceSearch(this, 1000);
         addBehaviour(serviceSearch);
@@ -158,9 +161,6 @@ public class Customer extends RestaurantAgent {
     }
 
     private void decideDish() {
-//        if(desiredDish != "")
-//            return;
-
         String oldDish = desiredDish;
         String[] dishes = Kitchen.getMenu();
         Random rand = new Random();
@@ -174,7 +174,12 @@ public class Customer extends RestaurantAgent {
 
     // Step 1: Order dish (corresponds to waiter's steps 1 and 3)
     public void orderDish() {
-        decideDish();
+        if(!hasDishArgument) {
+            decideDish();
+        }
+        else {
+            hasDishArgument = false;
+        }
 
         printMessage("I would like to eat " + desiredDish + ".");
 
