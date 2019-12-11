@@ -10,6 +10,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class Restaurant {
     private static ContainerController container;
@@ -28,52 +30,62 @@ public class Restaurant {
     private static void readFile(String file) {
         BufferedReader br;
         File agentList = new File(file);
-        String agent, name, agentClass;
-        String[] agentDetails, args;
+        String agent;
 
         try
         {
             br = new BufferedReader(new FileReader(agentList));
 
-            while((agent = br.readLine()) != null)
-            {
-                agentDetails = agent.split(" ");
+            while((agent = br.readLine()) != null) {
+                String[] agentParams = agent.split(" ");
 
-                switch (agentDetails[0]) {
-                    case "Kitchen":
-                        agentClass = "agents.Kitchen";
-                        args = Arrays.copyOfRange(agentDetails, 2, agentDetails.length);
-                        break;
-
-                    case "Waiter":
-                        agentClass = "agents.Waiter";
-                        args = new String[] {agentDetails[2]};
-                        break;
-
-                    case "Customer":
-                        agentClass = "agents.Customer";
-                        args = new String[] {agentDetails[2], agentDetails[3]};
-                        break;
-
-                    default:
-                        System.out.println("Unknown agent " + agentDetails[0]);
-                        continue;
-                }
-
-                name = agentDetails[1];
-
-                try {
-                    container.createNewAgent(name, agentClass, args).start();
-                }
-                catch(StaleProxyException e) {
-                    e.printStackTrace();
-                }
+                if(agentParams.length == 2)
+                    createAgents(agentParams[0], Integer.parseInt(agentParams[1]));
             }
 
             br.close();
         }
         catch(IOException e)
         {
+            e.printStackTrace();
+        }
+    }
+
+    private static void createAgents(String agentType, int quantity) {
+        String name, className;
+        String[] args = new String[0];
+
+        try {
+            for(int i = 0; i < quantity; i++) {
+                switch (agentType) {
+                    case "Kitchen":
+                        name = "K" + i;
+                        className = "agents.Kitchen";
+                        break;
+
+                    case "Waiter":
+                        Random rand = new Random();
+
+                        name = "W" + i;
+                        className = "agents.Waiter";
+                        args = new String[] {String.valueOf(rand.nextBoolean())};
+                        break;
+
+                    case "Customer":
+                        name = "C" + i;
+                        className = "agents.Customer";
+                        break;
+
+                    default:
+                        System.out.println("Unknown agent type: " + agentType);
+                        return;
+                }
+
+                container.createNewAgent(name, className, args).start();
+                TimeUnit.SECONDS.sleep(1);
+            }
+        }
+        catch (Exception e) {
             e.printStackTrace();
         }
     }

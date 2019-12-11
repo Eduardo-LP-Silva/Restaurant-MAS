@@ -41,7 +41,7 @@ public class Customer extends RestaurantAgent {
 
         Object[] args = getArguments();
 
-        if(args != null) {
+        if(args.length > 0) {
             desiredDish = (String) args[0];
             hasDishArgument = true;
         }
