@@ -12,11 +12,13 @@ import jade.proto.SimpleAchieveREInitiator;
 public class Customer extends RestaurantAgent {
     private static final long serialVersionUID = 3921787877132989337L;
     private String desiredDish;
+    private boolean hasDishArgument;
     private HashSet<AID> unavailableWaiters = new HashSet<>();
     private boolean hasWaiter;
     private AID waiter;
     private ArrayList<AID> waiters = new ArrayList<>();
     private int mood;
+    private int initialMood;
     private int attempts;
     private ServiceSearch serviceSearch;
 
@@ -28,12 +30,21 @@ public class Customer extends RestaurantAgent {
 
         Random random = new Random();
         mood = random.nextInt(9) + 1; //10 being very relaxed and 1 being very frustrated
+        initialMood = mood;
 
         printMessage("My mood: " + mood);
 
         hasWaiter = false;
         attempts = 0;
         desiredDish = "";
+        hasDishArgument = false;
+
+        Object[] args = getArguments();
+
+        if(args.length > 0) {
+            desiredDish = (String) args[0];
+            hasDishArgument = true;
+        }
 
         serviceSearch = new ServiceSearch(this, 1000);
         addBehaviour(serviceSearch);
@@ -74,6 +85,10 @@ public class Customer extends RestaurantAgent {
 
     public int getMood() {
         return mood;
+    }
+
+    public int getInitialMood() {
+        return initialMood;
     }
 
     public void decrementMood() {
@@ -159,7 +174,12 @@ public class Customer extends RestaurantAgent {
 
     // Step 1: Order dish (corresponds to waiter's steps 1 and 3)
     public void orderDish() {
-        decideDish();
+        if(!hasDishArgument) {
+            decideDish();
+        }
+        else {
+            hasDishArgument = false;
+        }
 
         printMessage("I would like to eat " + desiredDish + ".");
 

@@ -243,6 +243,10 @@ public class Waiter extends RestaurantAgent
         return customerID;
     }
 
+    public boolean getTrustworthy() {
+        return trustworthy;
+    }
+
     public ArrayList<Pair<AID, Boolean>> getWaiters() {
         return waiters;
     }

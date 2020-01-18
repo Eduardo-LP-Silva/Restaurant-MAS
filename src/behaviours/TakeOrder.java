@@ -130,7 +130,7 @@ public class TakeOrder extends SimpleBehaviour {
             myWaiter.sendMessage(myWaiter.getCustomerID(), ACLMessage.INFORM, FIPANames.InteractionProtocol.FIPA_CONTRACT_NET,
                     "order-request", dishInfo[2] + " - " + dishInfo[3]);
             myWaiter.addBehaviour(new ServeMeal(myAgent, Long.parseLong(dishInfo[2]) * 1000,
-                    myWaiter.getCustomerID(), dishInfo[0]));
+                    myWaiter.getCustomerID(), dishInfo));
             myWaiter.setCustomerID(null);
         }
     }
