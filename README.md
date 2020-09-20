@@ -2,9 +2,9 @@
 
 ## Overview
 
-A restaurant environment portrayed by a multi-agent system based on JADE, developed for the AIAD course unit.
+A restaurant environment portrayed by a multi-agent system based on JADE.
 
-In this system, we have three different types of agents: Kitchen, Waiter and Customer. There is only one Kitchen, but multiple Waiters and Customers.
+In this system, there are three different types of agents: Kitchen, Waiter and Customer. There is only one Kitchen, but multiple Waiters and Customers.
 
 As a regular restaurant would work, the customers interact with the waiters to get their order done and the waiters interact with the kitchen and with other waiters as a way to get information quickly. The kitchen verifies the orders’ availability and takes care of the order preparation.
 
